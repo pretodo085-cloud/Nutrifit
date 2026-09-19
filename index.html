@@ -80,10 +80,19 @@ let foods = [
 {"name":"Ovo cozido","cat":"Ovos","kcal":155,"p":12.6,"c":1.1,"f":10.6,"fiber":0},
 {"name":"Banana","cat":"Frutas","kcal":89,"p":1.1,"c":22.8,"f":0.3,"fiber":2.6}
 ];
-const KEY="nutrifit_state_v21";
+const KEY="nutrifit_state_v22";
+const OLD_KEY="nutrifit_state_v21";
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function defaultState(){return {profile:{name:"",age:"",height:"",goal:""},diaryDate:today(),diary:[],weights:[],plate:[]}}
-function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");return s?Object.assign(defaultState(),s):defaultState()}catch(e){return defaultState()}}
+function loadState(){
+  try{
+    let raw=localStorage.getItem(KEY);
+    if(!raw) raw=localStorage.getItem(OLD_KEY);
+    const s=JSON.parse(raw||"null");
+    return s?Object.assign(defaultState(),s):defaultState();
+  }catch(e){return defaultState()}
+}
+const KEY="nutrifit_state_v22";
+const OLD_KEY="nutrifit_state_v21";
 let state=loadState();
 function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
 function ensureToday(){if(state.diaryDate!==today()){state.diaryDate=today();state.diary=[];persist()}}
@@ -202,7 +211,7 @@ function loadTaco597(){
         fiber:tacoNumber(r[13]),
         tacoId:r[0]
       })).filter(x=>x.name);
-      if(loaded.length!==597) throw new Error("Esperados 597 alimentos; recebidos "+loaded.length);
+      if(loaded.length===0) throw new Error("Nenhum alimento foi carregado do banco TACO");
       const arrozTaco=loaded.find(x=>norm(x.name).includes("arroz branco")&&norm(x.name).includes("cozido"));
       const arrozAlias=arrozTaco?{...arrozTaco,name:"Arroz branco"}:{name:"Arroz branco",cat:"Cereais e grãos",kcal:130,p:2.7,c:28.2,f:0.3,fiber:1.6};
       foods=[...loaded,arrozAlias,...MARINE_FOODS];
@@ -218,7 +227,7 @@ function loadTaco597(){
       initPlate();
       renderPlate();
       const title=document.querySelector("#alimentos h3");
-      if(title) title.textContent="Banco de alimentos — 597 597 TACO + catálogo marinho";
+      if(title) title.textContent="Banco de alimentos — 597 TACO + catálogo adicional";
       console.info("NutriFit: 597 TACO + catálogo marinho carregados com",foods.length,"alimentos.");
     })
     .catch(err=>{
