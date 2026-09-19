@@ -1,0 +1,11 @@
+{
+  "name": "NutriFit",
+  "short_name": "NutriFit",
+  "description": "NutriFit — organização alimentar e educação nutricional geral.",
+  "start_url": "/Nutrifit/",
+  "scope": "/Nutrifit/",
+  "display": "standalone",
+  "background_color": "#07110d",
+  "theme_color": "#0b1711",
+  "lang": "pt-BR"
+}
