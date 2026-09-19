@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1711">
+<meta name="description" content="NutriFit — organização alimentar e educação nutricional geral."><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>NutriFit</title>
+<style>
+:root{--bg:#07110d;--panel:#0e1d17;--panel2:#12261e;--text:#f3fff8;--muted:#9ab0a5;--accent:#57e37b;--line:#244237;--danger:#ff7d7d}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(145deg,#06100c,#0a1813 55%,#06100c);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button{-webkit-tap-highlight-color:transparent}
+.app{max-width:1050px;margin:auto;padding:16px 16px 90px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:12px}.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,#48e878,#b8ff73);display:grid;place-items:center;color:#06200e;font-weight:900;font-size:24px;box-shadow:0 8px 24px #0004}.brand h1{margin:0;font-size:22px}.brand small{color:var(--muted)}
+nav{display:flex;gap:8px;margin:12px 0 18px;overflow:auto;padding-bottom:2px;scrollbar-width:none}nav button,.chip{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:10px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}nav button.active,.chip.active{background:var(--accent);color:#06200e;border-color:var(--accent);font-weight:800}
+.hero{background:linear-gradient(135deg,#11291e,#0d1d17);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:16px}.hero h2{margin:0 0 7px}.hero p{margin:0;color:var(--muted);line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}.card,.section{background:var(--panel);border:1px solid var(--line);border-radius:18px}.card{padding:16px}.stat b{font-size:25px}.stat span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+.section{padding:16px;margin:16px 0}.section h3{margin:0 0 12px}.search{width:100%;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#091610;color:var(--text);outline:none;font-size:16px}
+.chips{display:flex;gap:7px;overflow:auto;padding:12px 0;scrollbar-width:none}.foodlist{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.food{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:15px;padding:13px;cursor:pointer}.food strong{display:block}.food small{color:var(--muted)}.kcal{font-weight:800;color:var(--accent);white-space:nowrap}
+.detail{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}.bigkcal{font-size:42px;font-weight:900;color:var(--accent)}.macro{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.macro div{padding:10px 12px;background:var(--panel2);border-radius:12px;min-width:100px}.macro small{display:block;color:var(--muted)}
+input[type=number],input[type=text],input[type=date],select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#091610;color:var(--text);font-size:16px}
+.btn{background:var(--accent);color:#06200e;border:0;border-radius:13px;padding:12px 16px;font-weight:800;cursor:pointer}.btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.btn.danger{background:transparent;color:var(--danger);border:1px solid #633838}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1;min-width:140px}.empty{color:var(--muted);padding:18px 0}.meal{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.meal:last-child{border:0}.del{color:var(--danger);background:none;border:0;cursor:pointer;padding:6px}
+.hidden{display:none}.note{font-size:12px;color:var(--muted);line-height:1.5}.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:var(--panel2);color:var(--muted);font-size:12px}.install{border:1px dashed var(--accent)}footer{color:var(--muted);font-size:12px;line-height:1.5;text-align:center;padding:18px 8px}
+@media(max-width:720px){.app{padding:12px 12px 100px}.grid{grid-template-columns:repeat(2,1fr);gap:9px}.foodlist,.detail{grid-template-columns:1fr}.hero{padding:17px}nav{position:sticky;top:0;z-index:10;background:#07110dee;padding:8px 0;margin:0 0 12px}.row>*{min-width:100%}.btn{width:100%}.bigkcal{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="brand"><div class="logo">N</div><div><h1>NutriFit</h1><small>Alimentação inteligente • seu painel pessoal • 597 alimentos</small></div></header>
+
+<nav aria-label="Navegação principal">
+<button class="active" data-tab="inicio">Início</button><button data-tab="alimentos">Alimentos</button><button data-tab="prato">Prato</button><button data-tab="diario">Diário</button><button data-tab="evolucao">Evolução</button><button data-tab="perfil">Perfil</button><button data-tab="premium">Premium</button>
+</nav>
+
+<section id="inicio" class="tab">
+<div class="hero"><h2 id="hello">Seu painel de hoje</h2><p>Registre alimentos, monte seu prato e acompanhe seus registros de forma simples.</p></div>
+<div class="grid">
+<div class="card stat"><b id="homeKcal">0</b><span>kcal registradas</span></div><div class="card stat"><b id="homeP">0 g</b><span>proteínas</span></div><div class="card stat"><b id="homeC">0 g</b><span>carboidratos</span></div><div class="card stat"><b id="homeF">0 g</b><span>gorduras</span></div>
+</div>
+<div class="section"><h3>Comece agora</h3><div class="row"><button class="btn" onclick="go('alimentos')">🔎 Buscar alimentos</button><button class="btn secondary" onclick="go('prato')">🍽️ Montar prato</button><button class="btn secondary" onclick="go('diario')">📋 Abrir diário</button></div></div>
+<div class="section install"><h3>📱 Colocar na tela inicial</h3><p class="note">Depois de abrir este arquivo no navegador do celular, use o menu e procure <b>“Adicionar à tela inicial”</b> ou <b>“Instalar app”</b>. O nome será NutriFit.</p></div>
+</section>
+
+<section id="alimentos" class="tab hidden">
+<div class="section"><h3>Banco de alimentos</h3><input id="search" class="search" placeholder="🔎 Buscar arroz, frango, banana..." oninput="renderFoods()"><div class="chips" id="chips"></div><div id="foodlist" class="foodlist"></div></div>
+<div id="detail" class="section hidden"></div>
+<p class="note">Banco ampliado com a TACO — 4ª edição (NEPA/UNICAMP), com 597 alimentos e valores por 100 g. Os dados são informativos e não substituem avaliação profissional.</p>
+</section>
+
+<section id="prato" class="tab hidden">
+<div class="section"><h3>🍽️ Montar prato</h3><p class="note">Escolha um alimento e informe a quantidade. O cálculo é proporcional ao peso informado.</p><div class="row"><select id="plateFood"></select><input id="plateGrams" type="number" value="100" min="1" inputmode="decimal" placeholder="gramas"><button class="btn" onclick="addToPlate()">+ Adicionar</button></div></div>
+<div class="section"><h3>Resumo do prato</h3><div class="grid"><div class="card stat"><b id="plateKcal">0</b><span>kcal</span></div><div class="card stat"><b id="plateP">0 g</b><span>proteínas</span></div><div class="card stat"><b id="plateC">0 g</b><span>carboidratos</span></div><div class="card stat"><b id="plateF">0 g</b><span>gorduras</span></div></div><div id="plateItems"></div><div class="row" style="margin-top:14px"><button class="btn" onclick="savePlateToDiary()">✓ Adicionar ao diário</button><button class="btn secondary" onclick="clearPlate()">Limpar prato</button></div></div>
+</section>
+
+<section id="diario" class="tab hidden"><div class="section"><h3>📋 Diário alimentar</h3><div class="grid"><div class="card stat"><b id="dayKcal">0</b><span>kcal</span></div><div class="card stat"><b id="dayP">0 g</b><span>proteínas</span></div><div class="card stat"><b id="dayC">0 g</b><span>carboidratos</span></div><div class="card stat"><b id="dayF">0 g</b><span>gorduras</span></div></div><div id="meals"></div><button class="btn secondary" onclick="clearDiary()">Limpar diário de hoje</button></div></section>
+
+<section id="evolucao" class="tab hidden">
+<div class="section"><h3>📈 Evolução</h3><p class="note">Registre seu peso quando quiser. O histórico fica salvo neste aparelho.</p><div class="row"><input id="weightDate" type="date"><input id="weightValue" type="number" min="1" step="0.1" inputmode="decimal" placeholder="Peso em kg"><button class="btn" onclick="addWeight()">Registrar peso</button></div></div>
+<div class="section"><div class="grid"><div class="card stat"><b id="currentWeight">—</b><span>Peso atual</span></div><div class="card stat"><b id="goalWeight">—</b><span>Meta</span></div><div class="card stat"><b id="weightChange">—</b><span>Variação</span></div><div class="card stat"><b id="weightEntries">0</b><span>Registros</span></div></div><div id="weightHistory"></div></div>
+</section>
+
+<section id="perfil" class="tab hidden"><div class="section"><h3>👤 Seu perfil</h3><div class="row"><input id="profileName" type="text" placeholder="Nome ou apelido"><input id="profileAge" type="number" min="1" max="120" placeholder="Idade"></div><div class="row" style="margin-top:10px"><input id="profileHeight" type="number" min="50" max="250" step="0.1" placeholder="Altura em cm"><input id="profileGoal" type="number" min="1" step="0.1" placeholder="Meta de peso (kg)"></div><button class="btn" style="margin-top:10px" onclick="saveProfile()">Salvar perfil</button><p id="profileSaved" class="note"></p></div></section>
+
+<section id="premium" class="tab hidden">
+<div class="section"><h3>⭐ NutriFit Premium</h3><p>Área preparada para recursos pagos. <b>Nenhuma cobrança é feita nesta versão.</b></p><div class="grid"><div class="card"><b>Banco ampliado</b><p class="note">Mais alimentos e preparações após validação.</p></div><div class="card"><b>Refeições salvas</b><p class="note">Favoritos e combinações reutilizáveis.</p></div><div class="card"><b>Histórico avançado</b><p class="note">Relatórios e filtros de evolução.</p></div><div class="card"><b>Atualizações</b><p class="note">Novos recursos ao longo do tempo.</p></div></div><button class="btn" onclick="alert('Premium está em modo de demonstração. Nenhuma cobrança é realizada.')">Conhecer Premium</button></div>
+<div class="section"><h3>🔐 Seus dados</h3><p class="note">Os registros desta versão ficam no armazenamento local do navegador. Você pode exportar ou apagar os dados.</p><div class="row"><button class="btn secondary" onclick="exportData()">Exportar meus dados</button><button class="btn danger" onclick="clearAllData()">Apagar dados locais</button></div></div>
+</section>
+
+<footer>Fonte do banco ampliado: TACO — 4ª edição, NEPA/UNICAMP (597 alimentos; dados por 100 g).<br>NutriFit é uma ferramenta de organização alimentar e educação nutricional geral. Não substitui avaliação de médico ou nutricionista e não deve ser usado para diagnosticar ou tratar doenças.</footer>
+</div>
+
+<script>
+let foods = [
+{"name":"Arroz branco cozido","cat":"Cereais e grãos","kcal":130,"p":2.7,"c":28.2,"f":0.3,"fiber":1.6},
+{"name":"Feijão carioca cozido","cat":"Leguminosas","kcal":76,"p":4.8,"c":13.6,"f":0.5,"fiber":8.5},
+{"name":"Frango grelhado","cat":"Carnes e aves","kcal":165,"p":31,"c":0,"f":3.6,"fiber":0},
+{"name":"Ovo cozido","cat":"Ovos","kcal":155,"p":12.6,"c":1.1,"f":10.6,"fiber":0},
+{"name":"Banana","cat":"Frutas","kcal":89,"p":1.1,"c":22.8,"f":0.3,"fiber":2.6}
+];
+const KEY="nutrifit_state_v21";
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function defaultState(){return {profile:{name:"",age:"",height:"",goal:""},diaryDate:today(),diary:[],weights:[],plate:[]}}
+function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");return s?Object.assign(defaultState(),s):defaultState()}catch(e){return defaultState()}}
+let state=loadState();
+function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
+function ensureToday(){if(state.diaryDate!==today()){state.diaryDate=today();state.diary=[];persist()}}
+function fmt(n){return (Math.round((Number(n)||0)*10)/10).toString().replace(".",",")}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function go(tab){document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));const el=document.getElementById(tab);if(!el)return;el.classList.remove("hidden");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="alimentos")renderFoods();if(tab==="prato"){initPlate();renderPlate()}if(tab==="diario")renderDiary();if(tab==="evolucao")renderEvolution();if(tab==="perfil")loadProfile();updateHome();window.scrollTo({top:0,behavior:"smooth"})}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
+let selectedCat="Todos";const cats=["Todos",...new Set(foods.map(f=>f.cat))];
+document.getElementById("chips").innerHTML=cats.map(c=>`<button class="chip ${c==="Todos"?"active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{selectedCat=b.dataset.cat;document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active",x.dataset.cat===selectedCat));renderFoods()}));
+function renderFoods(){const q=(document.getElementById("search").value||"").toLowerCase().trim();const arr=foods.filter(f=>(selectedCat==="Todos"||f.cat===selectedCat)&&f.name.toLowerCase().includes(q));document.getElementById("foodlist").innerHTML=arr.map(f=>`<div class="food" data-name="${esc(f.name)}"><div><strong>${esc(f.name)}</strong><small>${esc(f.cat)} • por 100 g</small></div><div class="kcal">${f.kcal} kcal</div></div>`).join("")||'<div class="empty">Nenhum alimento encontrado.</div>';document.querySelectorAll(".food").forEach(el=>el.addEventListener("click",()=>showFood(el.dataset.name)))}
+function showFood(name){const f=foods.find(x=>x.name===name);if(!f)return;const d=document.getElementById("detail");d.classList.remove("hidden");d.innerHTML=`<div class="detail"><div><span class="badge">${esc(f.cat)}</span><h2>${esc(f.name)}</h2><div class="bigkcal" id="calcKcal">${f.kcal} kcal</div><small>por 100 g</small></div><div><div class="row"><input id="grams" type="number" value="100" min="1" inputmode="decimal"><button class="btn" id="addFoodBtn">+ Adicionar</button></div><div class="macro" id="macros"></div></div></div>`;document.getElementById("grams").addEventListener("input",()=>calc(name));document.getElementById("addFoodBtn").addEventListener("click",()=>addDiary(name));calc(name);d.scrollIntoView({behavior:"smooth",block:"nearest"})}
+function calc(name){const f=foods.find(x=>x.name===name),g=Math.max(1,Number(document.getElementById("grams")?.value||100)),m=g/100;document.getElementById("calcKcal").textContent=fmt(f.kcal*m)+" kcal";document.getElementById("macros").innerHTML=`<div><b>${fmt(f.p*m)} g</b><small>Proteínas</small></div><div><b>${fmt(f.c*m)} g</b><small>Carboidratos</small></div><div><b>${fmt(f.f*m)} g</b><small>Gorduras</small></div><div><b>${fmt(f.fiber*m)} g</b><small>Fibras</small></div>`}
+function addDiary(name){ensureToday();const g=Math.max(1,Number(document.getElementById("grams")?.value||100));state.diary.push({name,g,ts:Date.now()});persist();updateHome();alert(`${name} (${g} g) foi adicionado ao diário.`)}
+function totals(){return state.diary.reduce((a,x)=>{const f=foods.find(y=>y.name===x.name);if(!f)return a;const m=x.g/100;a.k+=f.kcal*m;a.p+=f.p*m;a.c+=f.c*m;a.f+=f.f*m;return a},{k:0,p:0,c:0,f:0})}
+function updateHome(){ensureToday();const t=totals();["homeKcal","homeP","homeC","homeF"].forEach((id,i)=>document.getElementById(id).textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g"][i]);const n=state.profile?.name?.trim();document.getElementById("hello").textContent=n?`Olá, ${n} 👋`:"Seu painel de hoje"}
+function renderDiary(){ensureToday();const t=totals();["dayKcal","dayP","dayC","dayF"].forEach((id,i)=>document.getElementById(id).textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g"][i]);document.getElementById("meals").innerHTML=state.diary.length?state.diary.map((x,i)=>{const f=foods.find(y=>y.name===x.name),k=f?f.kcal*x.g/100:0;return `<div class="meal"><span><b>${esc(x.name)}</b><br><small>${x.g} g • ${fmt(k)} kcal</small></span><button class="del" data-i="${i}">remover</button></div>`}).join(""):'<div class="empty">Seu diário de hoje está vazio. Adicione alimentos pela aba Alimentos.</div>';document.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>removeMeal(Number(b.dataset.i))))}
+function removeMeal(i){state.diary.splice(i,1);persist();renderDiary();updateHome()}
+function clearDiary(){if(confirm("Limpar o diário de hoje?")){state.diary=[];persist();renderDiary();updateHome()}}
+function initPlate(){const sel=document.getElementById("plateFood");if(!sel)return;if(sel.options.length!==foods.length)sel.innerHTML=foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("")}
+function addToPlate(){const name=document.getElementById("plateFood").value,grams=Math.max(1,Number(document.getElementById("plateGrams").value||100));if(!name)return;state.plate.push({name,grams});persist();renderPlate()}
+function plateTotals(){return state.plate.reduce((a,x)=>{const f=foods.find(y=>y.name===x.name);if(!f)return a;const m=x.grams/100;a.k+=f.kcal*m;a.p+=f.p*m;a.c+=f.c*m;a.f+=f.f*m;return a},{k:0,p:0,c:0,f:0})}
+function renderPlate(){const t=plateTotals();["plateKcal","plateP","plateC","plateF"].forEach((id,i)=>document.getElementById(id).textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g"][i]);document.getElementById("plateItems").innerHTML=state.plate.length?state.plate.map((x,i)=>`<div class="meal"><span><b>${esc(x.name)}</b><br><small>${x.grams} g</small></span><button class="del" data-pi="${i}">remover</button></div>`).join(""):'<div class="empty">Seu prato está vazio.</div>';document.querySelectorAll("[data-pi]").forEach(b=>b.addEventListener("click",()=>{state.plate.splice(Number(b.dataset.pi),1);persist();renderPlate()}))}
+function clearPlate(){state.plate=[];persist();renderPlate()}
+function savePlateToDiary(){ensureToday();if(!state.plate.length){alert("Adicione pelo menos um alimento ao prato.");return}state.plate.forEach(x=>state.diary.push({name:x.name,g:x.grams,ts:Date.now()}));const t=plateTotals();state.plate=[];persist();renderPlate();updateHome();alert(`Prato adicionado: ${fmt(t.k)} kcal.`)}
+function loadProfile(){const p=state.profile||{};document.getElementById("profileName").value=p.name||"";document.getElementById("profileAge").value=p.age||"";document.getElementById("profileHeight").value=p.height||"";document.getElementById("profileGoal").value=p.goal||""}
+function saveProfile(){state.profile={name:document.getElementById("profileName").value.trim(),age:document.getElementById("profileAge").value,height:document.getElementById("profileHeight").value,goal:document.getElementById("profileGoal").value};persist();document.getElementById("profileSaved").textContent="Perfil salvo neste aparelho.";updateHome();renderEvolution()}
+function addWeight(){const date=document.getElementById("weightDate").value||today(),value=Number(document.getElementById("weightValue").value);if(!value||value<=0){alert("Informe um peso válido.");return}state.weights=state.weights.filter(w=>w.date!==date);state.weights.push({date,value});state.weights.sort((a,b)=>a.date.localeCompare(b.date));persist();document.getElementById("weightValue").value="";renderEvolution()}
+function renderEvolution(){const ws=state.weights||[],p=state.profile||{},current=ws.length?ws[ws.length-1].value:null,first=ws.length?ws[0].value:null;document.getElementById("currentWeight").textContent=current?fmt(current)+" kg":"—";document.getElementById("goalWeight").textContent=p.goal?fmt(p.goal)+" kg":"—";document.getElementById("weightChange").textContent=(current&&first)?((current-first>0?"+":"")+fmt(current-first)+" kg"):"—";document.getElementById("weightEntries").textContent=ws.length;document.getElementById("weightDate").value=today();document.getElementById("weightHistory").innerHTML=ws.length?ws.slice().reverse().map(w=>`<div class="meal"><span>${esc(w.date)}</span><b>${fmt(w.value)} kg</b></div>`).join(""):'<div class="empty">Nenhum peso registrado ainda.</div>'}
+function exportData(){const blob=new Blob([JSON.stringify({app:"NutriFit",version:"2.1",exportedAt:new Date().toISOString(),data:state},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nutrifit-meus-dados.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function clearAllData(){if(confirm("Apagar todos os registros locais do NutriFit?")){localStorage.removeItem(KEY);state=defaultState();loadProfile();renderDiary();renderEvolution();updateHome();alert("Dados locais apagados.")}}
+const TACO_CSV_URL="https://raw.githubusercontent.com/brolesi/taco/refs/heads/main/data/processed/taco/taco_composicao.csv";
+
+function parseCSVLine(line){
+  const out=[]; let cur="", quoted=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){
+      if(quoted && line[i+1]==='"'){cur+='"';i++}
+      else quoted=!quoted;
+    }else if(ch==="," && !quoted){out.push(cur);cur=""}
+    else cur+=ch;
+  }
+  out.push(cur); return out;
+}
+
+function tacoNumber(v){
+  if(v==null || v==="" || v==="NA") return 0;
+  const n=Number(String(v).replace(",","."));
+  return Number.isFinite(n)?n:0;
+}
+
+function loadTaco597(){
+  return fetch(TACO_CSV_URL,{cache:"no-cache"})
+    .then(r=>{if(!r.ok) throw new Error("Falha ao carregar TACO"); return r.text()})
+    .then(text=>{
+      const lines=text.split(/\r?\n/).filter(Boolean);
+      if(lines.length<598) throw new Error("Banco TACO incompleto");
+      const rows=lines.slice(1).map(parseCSVLine);
+      const loaded=rows.map(r=>({
+        name:r[1],
+        cat:r[31]||"Outros",
+        kcal:tacoNumber(r[3]),
+        p:tacoNumber(r[5]),
+        c:tacoNumber(r[8]),
+        f:tacoNumber(r[6]),
+        fiber:tacoNumber(r[9]),
+        tacoId:r[0]
+      })).filter(x=>x.name);
+      if(loaded.length!==597) throw new Error("Esperados 597 alimentos; recebidos "+loaded.length);
+      foods=loaded;
+      selectedCat="Todos";
+      const cats=["Todos",...new Set(foods.map(f=>f.cat))];
+      document.getElementById("chips").innerHTML=cats.map(c=>`<button class="chip ${c==="Todos"?"active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+      document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+        selectedCat=b.dataset.cat;
+        document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active",x.dataset.cat===selectedCat));
+        renderFoods();
+      }));
+      renderFoods();
+      initPlate();
+      renderPlate();
+      const title=document.querySelector("#alimentos h3");
+      if(title) title.textContent="Banco de alimentos — 597 itens TACO";
+      console.info("NutriFit: TACO carregada com",foods.length,"alimentos.");
+    })
+    .catch(err=>{
+      console.warn("NutriFit iniciou com banco offline reduzido:",err);
+      const title=document.querySelector("#alimentos h3");
+      if(title) title.textContent="Banco de alimentos — modo offline";
+      renderFoods(); initPlate(); renderPlate();
+    });
+}
+
+document.getElementById("weightDate").value=today();
+renderFoods();initPlate();renderPlate();renderDiary();renderEvolution();loadProfile();updateHome();
+loadTaco597();
+</script>
+</body>
+</html>
