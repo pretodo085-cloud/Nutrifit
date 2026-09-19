@@ -27,7 +27,7 @@ input[type=number],input[type=text],input[type=date],select{width:100%;padding:1
 </head>
 <body>
 <div class="app">
-<header class="brand"><div class="logo">N</div><div><h1>NutriFit</h1><small>Alimentação inteligente • seu painel pessoal • 597 alimentos</small></div></header>
+<header class="brand"><div class="logo">N</div><div><h1>NutriFit</h1><small>Alimentação inteligente • seu painel pessoal • v2.1</small></div></header>
 
 <nav aria-label="Navegação principal">
 <button class="active" data-tab="inicio">Início</button><button data-tab="alimentos">Alimentos</button><button data-tab="prato">Prato</button><button data-tab="diario">Diário</button><button data-tab="evolucao">Evolução</button><button data-tab="perfil">Perfil</button><button data-tab="premium">Premium</button>
@@ -45,7 +45,7 @@ input[type=number],input[type=text],input[type=date],select{width:100%;padding:1
 <section id="alimentos" class="tab hidden">
 <div class="section"><h3>Banco de alimentos</h3><input id="search" class="search" placeholder="🔎 Buscar arroz, frango, banana..." oninput="renderFoods()"><div class="chips" id="chips"></div><div id="foodlist" class="foodlist"></div></div>
 <div id="detail" class="section hidden"></div>
-<p class="note">Banco ampliado com a TACO — 4ª edição (NEPA/UNICAMP), com 597 alimentos e valores por 100 g. Os dados são informativos e não substituem avaliação profissional.</p>
+<p class="note">A base completa usa a TACO 4ª edição (NEPA/UNICAMP), com valores por 100 g de parte comestível. O app carrega a base completa quando houver internet e mantém uma base local de reserva. Os dados são informativos e não substituem orientação profissional.</p>
 </section>
 
 <section id="prato" class="tab hidden">
@@ -67,17 +67,66 @@ input[type=number],input[type=text],input[type=date],select{width:100%;padding:1
 <div class="section"><h3>🔐 Seus dados</h3><p class="note">Os registros desta versão ficam no armazenamento local do navegador. Você pode exportar ou apagar os dados.</p><div class="row"><button class="btn secondary" onclick="exportData()">Exportar meus dados</button><button class="btn danger" onclick="clearAllData()">Apagar dados locais</button></div></div>
 </section>
 
-<footer>Fonte do banco ampliado: TACO — 4ª edição, NEPA/UNICAMP (597 alimentos; dados por 100 g).<br>NutriFit é uma ferramenta de organização alimentar e educação nutricional geral. Não substitui avaliação de médico ou nutricionista e não deve ser usado para diagnosticar ou tratar doenças.</footer>
+<footer>NutriFit é uma ferramenta de organização alimentar e educação nutricional geral. Não substitui avaliação de médico ou nutricionista e não deve ser usado para diagnosticar ou tratar doenças.</footer>
 </div>
 
 <script>
-let foods = [
-{"name":"Arroz branco cozido","cat":"Cereais e grãos","kcal":130,"p":2.7,"c":28.2,"f":0.3,"fiber":1.6},
-{"name":"Feijão carioca cozido","cat":"Leguminosas","kcal":76,"p":4.8,"c":13.6,"f":0.5,"fiber":8.5},
-{"name":"Frango grelhado","cat":"Carnes e aves","kcal":165,"p":31,"c":0,"f":3.6,"fiber":0},
-{"name":"Ovo cozido","cat":"Ovos","kcal":155,"p":12.6,"c":1.1,"f":10.6,"fiber":0},
-{"name":"Banana","cat":"Frutas","kcal":89,"p":1.1,"c":22.8,"f":0.3,"fiber":2.6}
-];
+let foods = [{"name": "Arroz branco cozido", "cat": "Cereais e grãos", "kcal": 130, "p": 2.7, "c": 28.2, "f": 0.3, "fiber": 1.6}, {"name": "Feijão carioca cozido", "cat": "Leguminosas", "kcal": 76, "p": 4.8, "c": 13.6, "f": 0.5, "fiber": 8.5}, {"name": "Frango grelhado", "cat": "Carnes e aves", "kcal": 165, "p": 31.0, "c": 0, "f": 3.6, "fiber": 0}, {"name": "Peito de frango cozido", "cat": "Carnes e aves", "kcal": 163, "p": 31.0, "c": 0, "f": 3.6, "fiber": 0}, {"name": "Carne bovina magra grelhada", "cat": "Carnes e aves", "kcal": 217, "p": 29.0, "c": 0, "f": 10.0, "fiber": 0}, {"name": "Ovo cozido", "cat": "Ovos", "kcal": 155, "p": 12.6, "c": 1.1, "f": 10.6, "fiber": 0}, {"name": "Salmão grelhado", "cat": "Peixes", "kcal": 208, "p": 20.4, "c": 0, "f": 13.4, "fiber": 0}, {"name": "Atum em água", "cat": "Peixes", "kcal": 116, "p": 25.5, "c": 0, "f": 0.8, "fiber": 0}, {"name": "Brócolis cozido", "cat": "Legumes e verduras", "kcal": 35, "p": 2.4, "c": 7.2, "f": 0.4, "fiber": 3.3}, {"name": "Cenoura cozida", "cat": "Legumes e verduras", "kcal": 35, "p": 0.8, "c": 8.2, "f": 0.2, "fiber": 3.0}, {"name": "Batata inglesa cozida", "cat": "Tubérculos", "kcal": 52, "p": 1.2, "c": 11.9, "f": 0.1, "fiber": 1.3}, {"name": "Batata-doce cozida", "cat": "Tubérculos", "kcal": 77, "p": 0.6, "c": 18.4, "f": 0.1, "fiber": 2.2}, {"name": "Abóbora cozida", "cat": "Legumes e verduras", "kcal": 48, "p": 1.2, "c": 10.8, "f": 0.7, "fiber": 2.5}, {"name": "Abobrinha cozida", "cat": "Legumes e verduras", "kcal": 17, "p": 1.2, "c": 3.1, "f": 0.3, "fiber": 1.1}, {"name": "Tomate", "cat": "Legumes e verduras", "kcal": 18, "p": 0.9, "c": 3.9, "f": 0.2, "fiber": 1.2}, {"name": "Alface", "cat": "Legumes e verduras", "kcal": 15, "p": 1.4, "c": 2.9, "f": 0.2, "fiber": 1.3}, {"name": "Couve", "cat": "Legumes e verduras", "kcal": 27, "p": 2.9, "c": 4.3, "f": 0.5, "fiber": 3.1}, {"name": "Espinafre", "cat": "Legumes e verduras", "kcal": 23, "p": 2.9, "c": 3.6, "f": 0.4, "fiber": 2.2}, {"name": "Banana", "cat": "Frutas", "kcal": 89, "p": 1.1, "c": 22.8, "f": 0.3, "fiber": 2.6}, {"name": "Maçã com casca", "cat": "Frutas", "kcal": 52, "p": 0.3, "c": 13.8, "f": 0.2, "fiber": 2.4}, {"name": "Mamão", "cat": "Frutas", "kcal": 43, "p": 0.5, "c": 10.8, "f": 0.3, "fiber": 1.7}, {"name": "Laranja", "cat": "Frutas", "kcal": 47, "p": 0.9, "c": 11.8, "f": 0.1, "fiber": 2.4}, {"name": "Abacate", "cat": "Frutas", "kcal": 160, "p": 2.0, "c": 8.5, "f": 14.7, "fiber": 6.7}, {"name": "Aveia em flocos", "cat": "Cereais e grãos", "kcal": 389, "p": 16.9, "c": 66.3, "f": 6.9, "fiber": 10.6}, {"name": "Pão francês", "cat": "Cereais e grãos", "kcal": 300, "p": 8.0, "c": 58.0, "f": 3.1, "fiber": 2.3}, {"name": "Leite integral", "cat": "Laticínios", "kcal": 61, "p": 3.2, "c": 4.8, "f": 3.3, "fiber": 0}, {"name": "Iogurte natural", "cat": "Laticínios", "kcal": 61, "p": 3.5, "c": 4.7, "f": 3.3, "fiber": 0}, {"name": "Queijo minas frescal", "cat": "Laticínios", "kcal": 264, "p": 17.4, "c": 3.2, "f": 20.2, "fiber": 0}, {"name": "Azeite de oliva", "cat": "Óleos e gorduras", "kcal": 884, "p": 0, "c": 0, "f": 100, "fiber": 0}, {"name": "Castanha-de-caju", "cat": "Oleaginosas", "kcal": 553, "p": 18.2, "c": 30.2, "f": 43.9, "fiber": 3.3};
+const TACO_URL="https://raw.githubusercontent.com/marcelosanto/tabela_taco/master/TACO.json";
+const LOCAL_FALLBACK_COUNT=foods.length;
+
+function num(v){
+  if(v===null || v===undefined || v==="" || v==="NA" || v==="Tr") return 0;
+  const n=Number(v); return Number.isFinite(n)?n:0;
+}
+function normalizeText(s){
+  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+}
+function mapTacoFood(x){
+  return {
+    name:String(x.description||"").trim(),
+    cat:String(x.category||"Outros"),
+    kcal:num(x.energy_kcal),
+    p:num(x.protein_g),
+    c:num(x.carbohydrate_g),
+    f:num(x.lipid_g),
+    fiber:num(x.fiber_g),
+    source:"TACO/NEPA-UNICAMP"
+  };
+}
+function rebuildFoodFilters(){
+  const chipBox=document.getElementById("chips");
+  if(!chipBox) return;
+  const cats=["Todos",...new Set(foods.map(f=>f.cat).filter(Boolean))];
+  if(!cats.includes(selectedCat)) selectedCat="Todos";
+  chipBox.innerHTML=cats.map(c=>`<button class="chip ${c==="Todos"?"active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+  chipBox.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+    selectedCat=b.dataset.cat;
+    chipBox.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active",x.dataset.cat===selectedCat));
+    renderFoods();
+  }));
+}
+async function loadCompleteFoodDatabase(){
+  try{
+    const res=await fetch(TACO_URL,{cache:"no-store"});
+    if(!res.ok) throw new Error("TACO HTTP "+res.status);
+    const data=await res.json();
+    const mapped=data.map(mapTacoFood).filter(f=>f.name);
+    if(mapped.length>=500){
+      foods=mapped;
+      rebuildFoodFilters();
+      renderFoods();
+      initPlate(true);
+      renderPlate();
+      const note=document.querySelector("#alimentos > .note");
+      if(note) note.innerHTML=`Base ampliada: <b>${foods.length} alimentos</b> da TACO 4ª edição. Valores por 100 g de parte comestível. Fonte: NEPA/UNICAMP.`;
+    }
+  }catch(e){
+    rebuildFoodFilters();
+    renderFoods();
+    initPlate(true);
+  }
+}
 const KEY="nutrifit_state_v21";
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function defaultState(){return {profile:{name:"",age:"",height:"",goal:""},diaryDate:today(),diary:[],weights:[],plate:[]}}
@@ -89,10 +138,9 @@ function fmt(n){return (Math.round((Number(n)||0)*10)/10).toString().replace("."
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function go(tab){document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));const el=document.getElementById(tab);if(!el)return;el.classList.remove("hidden");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));if(tab==="alimentos")renderFoods();if(tab==="prato"){initPlate();renderPlate()}if(tab==="diario")renderDiary();if(tab==="evolucao")renderEvolution();if(tab==="perfil")loadProfile();updateHome();window.scrollTo({top:0,behavior:"smooth"})}
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>go(b.dataset.tab)));
-let selectedCat="Todos";const cats=["Todos",...new Set(foods.map(f=>f.cat))];
-document.getElementById("chips").innerHTML=cats.map(c=>`<button class="chip ${c==="Todos"?"active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
-document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{selectedCat=b.dataset.cat;document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active",x.dataset.cat===selectedCat));renderFoods()}));
-function renderFoods(){const q=(document.getElementById("search").value||"").toLowerCase().trim();const arr=foods.filter(f=>(selectedCat==="Todos"||f.cat===selectedCat)&&f.name.toLowerCase().includes(q));document.getElementById("foodlist").innerHTML=arr.map(f=>`<div class="food" data-name="${esc(f.name)}"><div><strong>${esc(f.name)}</strong><small>${esc(f.cat)} • por 100 g</small></div><div class="kcal">${f.kcal} kcal</div></div>`).join("")||'<div class="empty">Nenhum alimento encontrado.</div>';document.querySelectorAll(".food").forEach(el=>el.addEventListener("click",()=>showFood(el.dataset.name)))}
+let selectedCat="Todos";
+rebuildFoodFilters();
+function renderFoods(){const q=normalizeText(document.getElementById("search").value||"").trim();const arr=foods.filter(f=>(selectedCat==="Todos"||f.cat===selectedCat)&&normalizeText(f.name).includes(q));document.getElementById("foodlist").innerHTML=arr.map(f=>`<div class="food" data-name="${esc(f.name)}"><div><strong>${esc(f.name)}</strong><small>${esc(f.cat)} • por 100 g</small></div><div class="kcal">${f.kcal} kcal</div></div>`).join("")||'<div class="empty">Nenhum alimento encontrado.</div>';document.querySelectorAll(".food").forEach(el=>el.addEventListener("click",()=>showFood(el.dataset.name)))}
 function showFood(name){const f=foods.find(x=>x.name===name);if(!f)return;const d=document.getElementById("detail");d.classList.remove("hidden");d.innerHTML=`<div class="detail"><div><span class="badge">${esc(f.cat)}</span><h2>${esc(f.name)}</h2><div class="bigkcal" id="calcKcal">${f.kcal} kcal</div><small>por 100 g</small></div><div><div class="row"><input id="grams" type="number" value="100" min="1" inputmode="decimal"><button class="btn" id="addFoodBtn">+ Adicionar</button></div><div class="macro" id="macros"></div></div></div>`;document.getElementById("grams").addEventListener("input",()=>calc(name));document.getElementById("addFoodBtn").addEventListener("click",()=>addDiary(name));calc(name);d.scrollIntoView({behavior:"smooth",block:"nearest"})}
 function calc(name){const f=foods.find(x=>x.name===name),g=Math.max(1,Number(document.getElementById("grams")?.value||100)),m=g/100;document.getElementById("calcKcal").textContent=fmt(f.kcal*m)+" kcal";document.getElementById("macros").innerHTML=`<div><b>${fmt(f.p*m)} g</b><small>Proteínas</small></div><div><b>${fmt(f.c*m)} g</b><small>Carboidratos</small></div><div><b>${fmt(f.f*m)} g</b><small>Gorduras</small></div><div><b>${fmt(f.fiber*m)} g</b><small>Fibras</small></div>`}
 function addDiary(name){ensureToday();const g=Math.max(1,Number(document.getElementById("grams")?.value||100));state.diary.push({name,g,ts:Date.now()});persist();updateHome();alert(`${name} (${g} g) foi adicionado ao diário.`)}
@@ -101,7 +149,7 @@ function updateHome(){ensureToday();const t=totals();["homeKcal","homeP","homeC"
 function renderDiary(){ensureToday();const t=totals();["dayKcal","dayP","dayC","dayF"].forEach((id,i)=>document.getElementById(id).textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g"][i]);document.getElementById("meals").innerHTML=state.diary.length?state.diary.map((x,i)=>{const f=foods.find(y=>y.name===x.name),k=f?f.kcal*x.g/100:0;return `<div class="meal"><span><b>${esc(x.name)}</b><br><small>${x.g} g • ${fmt(k)} kcal</small></span><button class="del" data-i="${i}">remover</button></div>`}).join(""):'<div class="empty">Seu diário de hoje está vazio. Adicione alimentos pela aba Alimentos.</div>';document.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>removeMeal(Number(b.dataset.i))))}
 function removeMeal(i){state.diary.splice(i,1);persist();renderDiary();updateHome()}
 function clearDiary(){if(confirm("Limpar o diário de hoje?")){state.diary=[];persist();renderDiary();updateHome()}}
-function initPlate(){const sel=document.getElementById("plateFood");if(!sel)return;if(sel.options.length!==foods.length)sel.innerHTML=foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("")}
+function initPlate(force=false){const sel=document.getElementById("plateFood");if(!sel)return;if(force||sel.options.length!==foods.length)sel.innerHTML=foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("")}
 function addToPlate(){const name=document.getElementById("plateFood").value,grams=Math.max(1,Number(document.getElementById("plateGrams").value||100));if(!name)return;state.plate.push({name,grams});persist();renderPlate()}
 function plateTotals(){return state.plate.reduce((a,x)=>{const f=foods.find(y=>y.name===x.name);if(!f)return a;const m=x.grams/100;a.k+=f.kcal*m;a.p+=f.p*m;a.c+=f.c*m;a.f+=f.f*m;return a},{k:0,p:0,c:0,f:0})}
 function renderPlate(){const t=plateTotals();["plateKcal","plateP","plateC","plateF"].forEach((id,i)=>document.getElementById(id).textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g"][i]);document.getElementById("plateItems").innerHTML=state.plate.length?state.plate.map((x,i)=>`<div class="meal"><span><b>${esc(x.name)}</b><br><small>${x.grams} g</small></span><button class="del" data-pi="${i}">remover</button></div>`).join(""):'<div class="empty">Seu prato está vazio.</div>';document.querySelectorAll("[data-pi]").forEach(b=>b.addEventListener("click",()=>{state.plate.splice(Number(b.dataset.pi),1);persist();renderPlate()}))}
@@ -113,72 +161,7 @@ function addWeight(){const date=document.getElementById("weightDate").value||tod
 function renderEvolution(){const ws=state.weights||[],p=state.profile||{},current=ws.length?ws[ws.length-1].value:null,first=ws.length?ws[0].value:null;document.getElementById("currentWeight").textContent=current?fmt(current)+" kg":"—";document.getElementById("goalWeight").textContent=p.goal?fmt(p.goal)+" kg":"—";document.getElementById("weightChange").textContent=(current&&first)?((current-first>0?"+":"")+fmt(current-first)+" kg"):"—";document.getElementById("weightEntries").textContent=ws.length;document.getElementById("weightDate").value=today();document.getElementById("weightHistory").innerHTML=ws.length?ws.slice().reverse().map(w=>`<div class="meal"><span>${esc(w.date)}</span><b>${fmt(w.value)} kg</b></div>`).join(""):'<div class="empty">Nenhum peso registrado ainda.</div>'}
 function exportData(){const blob=new Blob([JSON.stringify({app:"NutriFit",version:"2.1",exportedAt:new Date().toISOString(),data:state},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nutrifit-meus-dados.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function clearAllData(){if(confirm("Apagar todos os registros locais do NutriFit?")){localStorage.removeItem(KEY);state=defaultState();loadProfile();renderDiary();renderEvolution();updateHome();alert("Dados locais apagados.")}}
-const TACO_CSV_URL="https://raw.githubusercontent.com/brolesi/taco/refs/heads/main/data/processed/taco/taco_composicao.csv";
-
-function parseCSVLine(line){
-  const out=[]; let cur="", quoted=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i];
-    if(ch==='"'){
-      if(quoted && line[i+1]==='"'){cur+='"';i++}
-      else quoted=!quoted;
-    }else if(ch==="," && !quoted){out.push(cur);cur=""}
-    else cur+=ch;
-  }
-  out.push(cur); return out;
-}
-
-function tacoNumber(v){
-  if(v==null || v==="" || v==="NA") return 0;
-  const n=Number(String(v).replace(",","."));
-  return Number.isFinite(n)?n:0;
-}
-
-function loadTaco597(){
-  return fetch(TACO_CSV_URL,{cache:"no-cache"})
-    .then(r=>{if(!r.ok) throw new Error("Falha ao carregar TACO"); return r.text()})
-    .then(text=>{
-      const lines=text.split(/\r?\n/).filter(Boolean);
-      if(lines.length<598) throw new Error("Banco TACO incompleto");
-      const rows=lines.slice(1).map(parseCSVLine);
-      const loaded=rows.map(r=>({
-        name:r[1],
-        cat:r[31]||"Outros",
-        kcal:tacoNumber(r[3]),
-        p:tacoNumber(r[5]),
-        c:tacoNumber(r[8]),
-        f:tacoNumber(r[6]),
-        fiber:tacoNumber(r[9]),
-        tacoId:r[0]
-      })).filter(x=>x.name);
-      if(loaded.length!==597) throw new Error("Esperados 597 alimentos; recebidos "+loaded.length);
-      foods=loaded;
-      selectedCat="Todos";
-      const cats=["Todos",...new Set(foods.map(f=>f.cat))];
-      document.getElementById("chips").innerHTML=cats.map(c=>`<button class="chip ${c==="Todos"?"active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
-      document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
-        selectedCat=b.dataset.cat;
-        document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active",x.dataset.cat===selectedCat));
-        renderFoods();
-      }));
-      renderFoods();
-      initPlate();
-      renderPlate();
-      const title=document.querySelector("#alimentos h3");
-      if(title) title.textContent="Banco de alimentos — 597 itens TACO";
-      console.info("NutriFit: TACO carregada com",foods.length,"alimentos.");
-    })
-    .catch(err=>{
-      console.warn("NutriFit iniciou com banco offline reduzido:",err);
-      const title=document.querySelector("#alimentos h3");
-      if(title) title.textContent="Banco de alimentos — modo offline";
-      renderFoods(); initPlate(); renderPlate();
-    });
-}
-
-document.getElementById("weightDate").value=today();
-renderFoods();initPlate();renderPlate();renderDiary();renderEvolution();loadProfile();updateHome();
-loadTaco597();
+document.getElementById("weightDate").value=today();renderFoods();initPlate();renderPlate();renderDiary();renderEvolution();loadProfile();updateHome();loadCompleteFoodDatabase();
 </script>
 </body>
 </html>
