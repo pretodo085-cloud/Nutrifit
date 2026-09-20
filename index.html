@@ -335,7 +335,7 @@ const MARINE_FOODS=[
 ];
 
 function loadTaco597(){
-  const CACHE_KEY="nutrifit_taco_cache_v25";
+  const CACHE_KEY="nutrifit_taco_cache_v26";
 
   function validateTacoDataset(tacoFoods){
     if(!Array.isArray(tacoFoods)||tacoFoods.length!==597) return false;
@@ -395,19 +395,37 @@ function loadTaco597(){
       fiber:header.indexOf("fibra_g")
     };
 
+    // O arquivo oficial tem estas posições nutricionais. Usamos os índices
+    // encontrados no cabeçalho e conferimos o primeiro alimento antes de aceitar.
+    const expected={kcal:3,p:5,f:6,c:8,fiber:9};
+    if(idx.kcal!==expected.kcal||idx.p!==expected.p||idx.f!==expected.f||idx.c!==expected.c||idx.fiber!==expected.fiber){
+      throw new Error("Estrutura inesperada do CSV TACO: colunas nutricionais deslocadas.");
+    }
+
     const missing=Object.entries(idx).filter(x=>x[1]<0).map(x=>x[0]);
     if(missing.length) throw new Error("Colunas TACO ausentes: "+missing.join(", "));
 
     const loaded=rows.slice(1).map(r=>({
       name:String(r[idx.name]??"").trim(),
       cat:String(r[idx.cat]??"Outros").trim()||"Outros",
-      kcal:tacoNumber(r[idx.kcal]),
-      p:tacoNumber(r[idx.p]),
-      c:tacoNumber(r[idx.c]),
-      f:tacoNumber(r[idx.f]),
-      fiber:tacoNumber(r[idx.fiber]),
-      tacoId:String(r[idx.id]??"").trim()
+      kcal:tacoNumber(r[3]),
+      p:tacoNumber(r[5]),
+      c:tacoNumber(r[8]),
+      f:tacoNumber(r[6]),
+      fiber:tacoNumber(r[9]),
+      tacoId:String(r[0]??"").trim()
     })).filter(x=>x.name);
+
+    // Conferência obrigatória do arroz integral cozido: evita publicar
+    // qualquer conjunto com colunas erradas.
+    const arrozTeste=loaded.find(x=>foodKey(x.name)==="arroz, integral, cozido");
+    if(!arrozTeste || Math.abs(arrozTeste.kcal-123.5348925)>0.01 ||
+       Math.abs(arrozTeste.p-2.58825)>0.01 ||
+       Math.abs(arrozTeste.c-25.80975)>0.01 ||
+       Math.abs(arrozTeste.f-1.0003333333)>0.01 ||
+       Math.abs(arrozTeste.fiber-2.7493333333)>0.01){
+      throw new Error("Valores TACO incorretos no parser; banco rejeitado.");
+    }
 
     if(loaded.length!==597) throw new Error("Esperados 597 alimentos; recebidos "+loaded.length+".");
 
