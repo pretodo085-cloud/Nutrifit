@@ -98,6 +98,16 @@ function migrateWeightDates(){
 }
 migrateWeightDates();
 function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
+
+function normalizePlateState(){
+  if(!Array.isArray(state.plate))state.plate=[];
+  state.plate=state.plate.map(x=>({
+    name:String(x?.name||"").trim(),
+    grams:safeGrams(x?.grams)
+  })).filter(x=>x.name&&x.grams);
+  persist();
+}
+normalizePlateState();
 function ensureToday(){if(state.diaryDate!==today()){state.diaryDate=today();state.diary=[];persist()}}
 function fmt(n){return (Math.round((Number(n)||0)*10)/10).toString().replace(".",",")}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -146,11 +156,26 @@ function addToPlate(){
   input.value="100";
 }
 
+function getPlateFood(name){
+  const key=foodKey(name);
+  if(typeof EMBEDDED_TACO_597!=="undefined"&&Array.isArray(EMBEDDED_TACO_597)){
+    const taco=EMBEDDED_TACO_597.find(f=>foodKey(f.name)===key);
+    if(taco)return taco;
+  }
+  return Array.isArray(foods)?foods.find(f=>foodKey(f.name)===key):null;
+}
 function plateTotals(){
   return state.plate.reduce((a,x)=>{
-    const f=findFood(x.name),n=nutrition(f,x.grams);
-    if(!f)return a;
-    a.k+=n.kcal;a.p+=n.p;a.c+=n.c;a.f+=n.f;a.fiber+=n.fiber;a.g+=n.grams;
+    const f=getPlateFood(x.name);
+    const grams=safeGrams(x.grams);
+    if(!f||!grams)return a;
+    const m=grams/100;
+    a.k+=(Number(f.kcal)||0)*m;
+    a.p+=(Number(f.p)||0)*m;
+    a.c+=(Number(f.c)||0)*m;
+    a.f+=(Number(f.f)||0)*m;
+    a.fiber+=(Number(f.fiber)||0)*m;
+    a.g+=grams;
     return a;
   },{k:0,p:0,c:0,f:0,fiber:0,g:0});
 }
@@ -166,7 +191,7 @@ function updatePlateSummary(){
 function updatePlateItem(i){
   const item=state.plate[i];
   if(!item)return;
-  const f=findFood(item.name);
+  const f=getPlateFood(item.name);
   const info=document.querySelector('[data-plate-info="'+i+'"]');
   if(!info||!f)return;
   const n=nutrition(f,item.grams);
@@ -180,8 +205,7 @@ function changePlateGrams(i,value){
   if(!grams)return;
   item.grams=grams;
   persist();
-  updatePlateSummary();
-  updatePlateItem(i);
+  renderPlate();
 }
 window.changePlateGrams=changePlateGrams;
 
