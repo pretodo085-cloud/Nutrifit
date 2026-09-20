@@ -1,4 +1,4 @@
-const CACHE_NAME = "nutrifit-v3";
+const CACHE_NAME = "nutrifit-final-v4";
 const ASSETS = ["./","./index.html","./manifest.webmanifest","./icon-192.svg","./icon-512.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
@@ -10,8 +10,8 @@ self.addEventListener("activate", event => {
 });
 self.addEventListener("fetch", event => {
   if(event.request.method !== "GET") return;
-  const url=new URL(event.request.url);
-  if(url.origin===location.origin){
-    event.respondWith(caches.match(event.request).then(r=>r||fetch(event.request)));
+  const url = new URL(event.request.url);
+  if(url.origin === location.origin){
+    event.respondWith(caches.match(event.request).then(r => r || fetch(event.request)));
   }
 });
