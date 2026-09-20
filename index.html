@@ -89,15 +89,9 @@ function loadState(){
 let state=loadState();
 function migrateWeightDates(){
   if(!Array.isArray(state.weights)) return;
-  let changed=false;
-  state.weights=state.weights.map(w=>{
-    if(w && w.date==="1997-03-19"){
-      changed=true;
-      return {...w,date:today()};
-    }
-    return w;
-  });
-  if(changed) persist();
+  const before=state.weights.length;
+  state.weights=state.weights.filter(w=>!(w && w.date==="1997-03-19"));
+  if(state.weights.length!==before) persist();
 }
 migrateWeightDates();
 function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
