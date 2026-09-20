@@ -167,7 +167,7 @@ function updatePlateItem(i){
   const info=document.querySelector('[data-plate-info="'+i+'"]');
   if(!info||!f)return;
   const n=nutrition(f,item.grams);
-  info.innerHTML=`${fmt(n.kcal)} kcal • P ${fmt(n.p)} g • C ${fmt(n.c)} g • G ${fmt(n.f)} g • Fibra ${fmt(n.fiber)} g`;
+  info.innerHTML=`<span style="font-weight:700">${fmt(n.grams)} g</span> • ${fmt(n.kcal)} kcal • P ${fmt(n.p)} g • C ${fmt(n.c)} g • G ${fmt(n.f)} g • Fibra ${fmt(n.fiber)} g`;
 }
 
 function renderPlate(){
