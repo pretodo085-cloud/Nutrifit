@@ -122,8 +122,8 @@ function clearAllData(){if(confirm("Apagar todos os registros locais do NutriFit
 const TACO_CSV_URL="https://raw.githubusercontent.com/brolesi/taco/refs/heads/main/data/processed/taco/taco_composicao.csv";
 
 function normHeader(s){
-  return String(s??"").replace(/^\\uFEFF/,"").normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim()
+  return String(s??"").replace(/^\uFEFF/,"").normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()
     .replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
 }
 
@@ -136,8 +136,8 @@ function parseCSV(text){
       else quoted=!quoted;
     }else if(ch===","&&!quoted){
       row.push(cur);cur="";
-    }else if((ch==="\\n"||ch==="\\r")&&!quoted){
-      if(ch==="\\r"&&text[i+1]==="\\n")i++;
+    }else if((ch==="\n"||ch==="\r")&&!quoted){
+      if(ch==="\r"&&text[i+1]==="\n")i++;
       row.push(cur);cur="";
       if(row.some(v=>String(v).trim()!==""))rows.push(row.splice(0,row.length));
     }else cur+=ch;
@@ -151,7 +151,7 @@ function tacoNumber(v){
   if(v==null)return 0;
   const raw=String(v).trim();
   if(!raw||/^na$/i.test(raw)||/^null$/i.test(raw))return 0;
-  const n=Number(raw.replace(/\\s/g,"").replace(",","."));
+  const n=Number(raw.replace(/\s/g,"").replace(",","."));
   return Number.isFinite(n)?n:0;
 }
 
