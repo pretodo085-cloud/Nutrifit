@@ -120,7 +120,17 @@ function updateHome(){ensureToday();const t=totals();["homeKcal","homeP","homeC"
 function renderDiary(){ensureToday();const t=totals();["dayKcal","dayP","dayC","dayF","dayFiber","dayWeight"].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g",fmt(t.fiber)+" g",fmt(t.g)+" g"][i]});document.getElementById("meals").innerHTML=state.diary.length?state.diary.map((x,i)=>{const f=findFood(x.name),n=nutrition(f,x.g);return `<div class="meal"><span><b>${esc(x.name)}</b><br><small>${fmt(n.grams)} g • ${fmt(n.kcal)} kcal • P ${fmt(n.p)} g • C ${fmt(n.c)} g • G ${fmt(n.f)} g • Fibra ${fmt(n.fiber)} g</small></span><button class="del" data-i="${i}">remover</button></div>`}).join(""):'<div class="empty">Seu diário de hoje está vazio. Adicione alimentos pela aba Alimentos.</div>';document.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>removeMeal(Number(b.dataset.i))))}
 function removeMeal(i){state.diary.splice(i,1);persist();renderDiary();updateHome()}
 function clearDiary(){if(confirm("Limpar o diário de hoje?")){state.diary=[];persist();renderDiary();updateHome()}}
-function initPlate(){const sel=document.getElementById("plateFood");if(!sel)return;sel.innerHTML=foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("")}
+function initPlate(){
+  const sel=document.getElementById("plateFood");
+  if(!sel)return;
+  const source=(Array.isArray(foods)&&foods.length>=597)
+    ?foods
+    :((typeof EMBEDDED_TACO_597!=="undefined"&&Array.isArray(EMBEDDED_TACO_597))
+      ?EMBEDDED_TACO_597
+      :[]);
+  sel.innerHTML=source.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("");
+  if(!sel.options.length) sel.innerHTML='<option value="">Banco de alimentos carregando...</option>';
+}
 function addToPlate(){
   const name=document.getElementById("plateFood").value;
   const input=document.getElementById("plateGrams");
