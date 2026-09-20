@@ -346,7 +346,8 @@ const MARINE_FOODS=[
 ];
 
 function loadTaco597(){
-  const CACHE_KEY="nutrifit_taco_cache_v30";
+  const CACHE_KEY="nutrifit_taco_cache_v31";
+  const LEGACY_CACHE_KEYS=["nutrifit_taco_cache_v30","nutrifit_taco_cache_v29","nutrifit_taco_cache_v28"];
 
   function applyFoodsSafe(tacoFoods){
     if(!Array.isArray(tacoFoods)||tacoFoods.length<597) throw new Error("Banco TACO incorporado incompleto.");
