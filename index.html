@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1711">
 <meta name="description" content="NutriFit — organização alimentar e educação nutricional geral."><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>NutriFit 2.3.1 — 597 TACO + catálogo adicional</title>
+<title>NutriFit 2.3.2 — 597 TACO + catálogo adicional</title>
 <style>
 :root{--bg:#07110d;--panel:#0e1d17;--panel2:#12261e;--text:#f3fff8;--muted:#9ab0a5;--accent:#57e37b;--line:#244237;--danger:#ff7d7d}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(145deg,#06100c,#0a1813 55%,#06100c);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
@@ -336,69 +336,72 @@ const MARINE_FOODS=[
 ];
 
 function loadTaco597(){
-  const CACHE_KEY="nutrifit_taco_cache_v29";
+  const CACHE_KEY="nutrifit_taco_cache_v30";
 
-  function validateTacoDataset(tacoFoods){
-    if(!Array.isArray(tacoFoods)||tacoFoods.length!==597) return false;
-    const arroz=tacoFoods.find(x=>foodKey(x.name)==="arroz, integral, cozido");
-    if(!arroz) return false;
-    if(Math.abs(arroz.kcal-123.5348925)>0.01||Math.abs(arroz.p-2.58825)>0.01||
-       Math.abs(arroz.c-25.80975)>0.01||Math.abs(arroz.f-1.0003333333)>0.01||
-       Math.abs(arroz.fiber-2.7493333333)>0.01) return false;
-    return tacoFoods.every(x=>
-      Number.isFinite(Number(x.kcal))&&Number(x.kcal)>=0&&Number(x.kcal)<=1500&&
-      Number.isFinite(Number(x.p))&&Number(x.p)>=0&&Number(x.p)<=100&&
-      Number.isFinite(Number(x.c))&&Number(x.c)>=0&&Number(x.c)<=100&&
-      Number.isFinite(Number(x.f))&&Number(x.f)>=0&&Number(x.f)<=100&&
-      Number.isFinite(Number(x.fiber))&&Number(x.fiber)>=0&&Number(x.fiber)<=100
-    );
-  }
-
-  function applyFoods(tacoFoods){
-    if(!validateTacoDataset(tacoFoods)) throw new Error("Banco TACO inválido.");
-    const seen=new Set(tacoFoods.map(x=>foodKey(x.name)));
+  function applyFoodsSafe(tacoFoods){
+    if(!Array.isArray(tacoFoods)||tacoFoods.length<597) throw new Error("Banco TACO incorporado incompleto.");
+    const taco=tacoFoods.slice(0,597).map(x=>({
+      name:String(x.name||"").trim(),
+      cat:String(x.cat||"Outros").trim(),
+      kcal:Number(x.kcal)||0,
+      p:Number(x.p)||0,
+      c:Number(x.c)||0,
+      f:Number(x.f)||0,
+      fiber:Number(x.fiber)||0,
+      tacoId:x.tacoId
+    })).filter(x=>x.name);
+    if(taco.length!==597) throw new Error("Banco TACO incorporado inválido.");
+    const seen=new Set(taco.map(x=>foodKey(x.name)));
     const marine=MARINE_FOODS.filter(x=>!seen.has(foodKey(x.name)));
-    foods=[...tacoFoods,...marine];
+    foods=[...taco,...marine];
     selectedCat="Todos";
-    rebuildCategories();
-    renderFoods();
-    initPlate();
-    renderPlate();
-    const title=document.querySelector("#alimentos h3");
-    if(title) title.textContent="Banco de alimentos — 597 TACO + "+marine.length+" adicionais";
+    localStorage.setItem(CACHE_KEY,JSON.stringify(taco));
+    return marine.length;
   }
 
   try{
-    const embedded=EMBEDDED_TACO_597;
-    if(validateTacoDataset(embedded)){
-      localStorage.setItem(CACHE_KEY,JSON.stringify(embedded));
-      applyFoods(embedded);
-      return Promise.resolve();
-    }
-  }catch(e){ console.warn("NutriFit: banco TACO incorporado falhou.",e); }
+    const added=applyFoodsSafe(EMBEDDED_TACO_597);
+    return Promise.resolve(added);
+  }catch(e){
+    console.warn("NutriFit: banco incorporado falhou.",e);
+  }
 
   try{
     const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");
-    if(validateTacoDataset(cached)){ applyFoods(cached); return Promise.resolve(); }
+    const added=applyFoodsSafe(cached);
+    return Promise.resolve(added);
+  }catch(e){
     localStorage.removeItem(CACHE_KEY);
-  }catch(e){ localStorage.removeItem(CACHE_KEY); }
+  }
 
-  return fetch(TACO_CSV_URL,{cache:"no-store"})
-    .then(r=>{if(!r.ok)throw new Error("Falha ao carregar TACO ("+r.status+")");return r.text();})
-    .then(text=>{
-      throw new Error("Fonte externa indisponível no modo seguro.");
-    })
-    .catch(err=>{
-      const title=document.querySelector("#alimentos h3");
-      if(title) title.textContent="Banco de alimentos — modo offline";
-      renderFoods();initPlate();renderPlate();
-      console.warn("NutriFit: usando banco incorporado.",err);
-    });
+  foods=[...MARINE_FOODS];
+  return Promise.resolve(0);
 }
 
 document.getElementById("weightDate").value=today();
-rebuildCategories();renderFoods();initPlate();renderPlate();renderDiary();renderEvolution();loadProfile();updateHome();
-loadTaco597();
+loadTaco597().then(added=>{
+  rebuildCategories();
+  renderFoods();
+  initPlate();
+  renderPlate();
+  renderDiary();
+  renderEvolution();
+  loadProfile();
+  updateHome();
+  const title=document.querySelector("#alimentos h3");
+  if(title) title.textContent="Banco de alimentos — 597 TACO + "+added+" adicionais";
+}).catch(err=>{
+  console.error("NutriFit: falha na inicialização.",err);
+  foods=[...MARINE_FOODS];
+  rebuildCategories();
+  renderFoods();
+  initPlate();
+  renderPlate();
+  renderDiary();
+  renderEvolution();
+  loadProfile();
+  updateHome();
+});
 </script>
 </body>
 </html>
