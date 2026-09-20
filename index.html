@@ -175,16 +175,15 @@ function renderPlate(){
   const container=document.getElementById("plateItems");
   container.innerHTML=state.plate.length
     ?state.plate.map((x,i)=>`<div class="meal" data-plate-row="${i}">
-        <span style="flex:1">
-          <b>${esc(x.name)}</b><br>
-          <small style="display:flex;align-items:center;gap:7px;margin-top:7px;flex-wrap:wrap">
-            <label>Quantidade:
-              <input class="plate-grams" data-plate-grams="${i}" type="number" value="${esc(x.grams)}" min="0.1" max="10000" step="0.1" inputmode="decimal" style="width:105px;padding:8px">
-              g
-            </label>
-            <span data-plate-info="${i}"></span>
-          </small>
-        </span>
+        <div style="flex:1;min-width:0">
+          <b>${esc(x.name)}</b>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <span style="font-size:14px">Quantidade:</span>
+            <input class="plate-grams" data-plate-grams="${i}" type="number" value="${esc(x.grams)}" min="0.1" max="10000" step="0.1" inputmode="decimal" aria-label="Quantidade em gramas" style="width:105px!important;flex:0 0 105px;padding:8px">
+            <span style="font-size:14px">g</span>
+          </div>
+          <div data-plate-info="${i}" style="margin-top:6px;color:var(--muted);font-size:13px"></div>
+        </div>
         <button class="del" data-pi="${i}">remover</button>
       </div>`).join("")
     :'<div class="empty">Seu prato está vazio.</div>';
@@ -197,7 +196,6 @@ function renderPlate(){
 
   document.querySelectorAll("[data-plate-grams]").forEach(input=>{
     const i=Number(input.dataset.plateGrams);
-
     input.addEventListener("input",()=>{
       const grams=safeGrams(input.value);
       if(!grams)return;
@@ -206,7 +204,6 @@ function renderPlate(){
       updatePlateSummary();
       updatePlateItem(i);
     });
-
     input.addEventListener("change",()=>{
       const grams=safeGrams(input.value);
       if(!grams){
@@ -222,7 +219,6 @@ function renderPlate(){
       updatePlateItem(i);
     });
   });
-
   state.plate.forEach((_,i)=>updatePlateItem(i));
 }
 
