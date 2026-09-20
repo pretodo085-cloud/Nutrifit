@@ -49,7 +49,7 @@ input[type=number],input[type=text],input[type=date],select{width:100%;padding:1
 </section>
 
 <section id="prato" class="tab hidden">
-<div class="section"><h3>🍽️ Montar prato</h3><p class="note">Escolha um alimento e informe a quantidade. O cálculo é proporcional ao peso informado.</p><div class="row"><select id="plateFood"></select><input id="plateGrams" type="number" value="" min="0.1" max="10000" step="0.1" inputmode="decimal" placeholder="gramas"><button class="btn" onclick="addToPlate()">+ Adicionar</button></div></div>
+<div class="section"><h3>🍽️ Montar prato</h3><p class="note">Escolha um alimento e informe a quantidade. O cálculo é proporcional ao peso informado.</p><div class="row"><select id="plateFood"></select><input id="plateGrams" type="number" value="100" min="0.1" max="10000" step="0.1" inputmode="decimal" placeholder="gramas" aria-label="Quantidade em gramas"><button class="btn" onclick="addToPlate()">+ Adicionar</button></div></div>
 <div class="section"><h3>Resumo do prato</h3><div class="grid"><div class="card stat"><b id="plateKcal">0</b><span>kcal</span></div><div class="card stat"><b id="plateP">0 g</b><span>proteínas</span></div><div class="card stat"><b id="plateC">0 g</b><span>carboidratos</span></div><div class="card stat"><b id="plateF">0 g</b><span>gorduras</span></div></div><div id="plateItems"></div><div class="row" style="margin-top:14px"><button class="btn" onclick="savePlateToDiary()">✓ Adicionar ao diário</button><button class="btn secondary" onclick="clearPlate()">Limpar prato</button></div></div>
 </section>
 
@@ -117,11 +117,115 @@ function renderDiary(){ensureToday();const t=totals();["dayKcal","dayP","dayC","
 function removeMeal(i){state.diary.splice(i,1);persist();renderDiary();updateHome()}
 function clearDiary(){if(confirm("Limpar o diário de hoje?")){state.diary=[];persist();renderDiary();updateHome()}}
 function initPlate(){const sel=document.getElementById("plateFood");if(!sel)return;if(sel.options.length!==foods.length)sel.innerHTML=foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("")}
-function addToPlate(){const name=document.getElementById("plateFood").value,raw=document.getElementById("plateGrams").value,grams=safeGrams(raw);if(!name)return;if(!grams){alert("Informe um peso entre 0,1 g e 10.000 g.");return}state.plate.push({name,grams});persist();renderPlate()}
-function plateTotals(){return state.plate.reduce((a,x)=>{const f=findFood(x.name),n=nutrition(f,x.grams);if(!f)return a;a.k+=n.kcal;a.p+=n.p;a.c+=n.c;a.f+=n.f;a.fiber+=n.fiber;a.g+=n.grams;return a},{k:0,p:0,c:0,f:0,fiber:0,g:0})}
-function renderPlate(){const t=plateTotals();["plateKcal","plateP","plateC","plateF","plateFiber","plateWeight"].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g",fmt(t.fiber)+" g",fmt(t.g)+" g"][i]});document.getElementById("plateItems").innerHTML=state.plate.length?state.plate.map((x,i)=>`<div class="meal"><span><b>${esc(x.name)}</b><br><small>${fmt(x.grams)} g</small></span><button class="del" data-pi="${i}">remover</button></div>`).join(""):'<div class="empty">Seu prato está vazio.</div>';document.querySelectorAll("[data-pi]").forEach(b=>b.addEventListener("click",()=>{state.plate.splice(Number(b.dataset.pi),1);persist();renderPlate()}))}
+function addToPlate(){
+  const name=document.getElementById("plateFood").value;
+  const input=document.getElementById("plateGrams");
+  const grams=safeGrams(input.value);
+  if(!name)return;
+  if(!grams){alert("Informe um peso entre 0,1 g e 10.000 g.");input.focus();return}
+  state.plate.push({name,grams});
+  persist();
+  renderPlate();
+  input.value="100";
+}
+
+function plateTotals(){
+  return state.plate.reduce((a,x)=>{
+    const f=findFood(x.name),n=nutrition(f,x.grams);
+    if(!f)return a;
+    a.k+=n.kcal;a.p+=n.p;a.c+=n.c;a.f+=n.f;a.fiber+=n.fiber;a.g+=n.grams;
+    return a;
+  },{k:0,p:0,c:0,f:0,fiber:0,g:0});
+}
+
+function updatePlateSummary(){
+  const t=plateTotals();
+  ["plateKcal","plateP","plateC","plateF","plateFiber","plateWeight"].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g",fmt(t.fiber)+" g",fmt(t.g)+" g"][i];
+  });
+}
+
+function updatePlateItem(i){
+  const item=state.plate[i];
+  if(!item)return;
+  const f=findFood(item.name);
+  const info=document.querySelector('[data-plate-info="'+i+'"]');
+  if(!info||!f)return;
+  const n=nutrition(f,item.grams);
+  info.innerHTML=`${fmt(n.kcal)} kcal • P ${fmt(n.p)} g • C ${fmt(n.c)} g • G ${fmt(n.f)} g • Fibra ${fmt(n.fiber)} g`;
+}
+
+function renderPlate(){
+  updatePlateSummary();
+  const container=document.getElementById("plateItems");
+  container.innerHTML=state.plate.length
+    ?state.plate.map((x,i)=>`<div class="meal" data-plate-row="${i}">
+        <span style="flex:1">
+          <b>${esc(x.name)}</b><br>
+          <small style="display:flex;align-items:center;gap:7px;margin-top:7px;flex-wrap:wrap">
+            <label>Quantidade:
+              <input class="plate-grams" data-plate-grams="${i}" type="number" value="${esc(x.grams)}" min="0.1" max="10000" step="0.1" inputmode="decimal" style="width:105px;padding:8px">
+              g
+            </label>
+            <span data-plate-info="${i}"></span>
+          </small>
+        </span>
+        <button class="del" data-pi="${i}">remover</button>
+      </div>`).join("")
+    :'<div class="empty">Seu prato está vazio.</div>';
+
+  document.querySelectorAll("[data-pi]").forEach(b=>b.addEventListener("click",()=>{
+    state.plate.splice(Number(b.dataset.pi),1);
+    persist();
+    renderPlate();
+  }));
+
+  document.querySelectorAll("[data-plate-grams]").forEach(input=>{
+    const i=Number(input.dataset.plateGrams);
+
+    input.addEventListener("input",()=>{
+      const grams=safeGrams(input.value);
+      if(!grams)return;
+      state.plate[i].grams=grams;
+      persist();
+      updatePlateSummary();
+      updatePlateItem(i);
+    });
+
+    input.addEventListener("change",()=>{
+      const grams=safeGrams(input.value);
+      if(!grams){
+        input.value=state.plate[i]?.grams||100;
+        updatePlateSummary();
+        updatePlateItem(i);
+        return;
+      }
+      state.plate[i].grams=grams;
+      input.value=grams;
+      persist();
+      updatePlateSummary();
+      updatePlateItem(i);
+    });
+  });
+
+  state.plate.forEach((_,i)=>updatePlateItem(i));
+}
+
 function clearPlate(){state.plate=[];persist();renderPlate()}
-function savePlateToDiary(){ensureToday();if(!state.plate.length){alert("Adicione pelo menos um alimento ao prato.");return}state.plate.forEach(x=>state.diary.push({name:x.name,g:x.grams,ts:Date.now()}));const t=plateTotals();state.plate=[];persist();renderPlate();updateHome();alert(`Prato adicionado: ${fmt(t.k)} kcal.`)}
+
+function savePlateToDiary(){
+  ensureToday();
+  if(!state.plate.length){alert("Adicione pelo menos um alimento ao prato.");return}
+  const t=plateTotals();
+  const now=Date.now();
+  state.plate.forEach(x=>state.diary.push({name:x.name,g:x.grams,ts:now}));
+  state.plate=[];
+  persist();
+  renderPlate();
+  updateHome();
+  alert(`Prato adicionado: ${fmt(t.k)} kcal.`);
+}
 function loadProfile(){const p=state.profile||{};document.getElementById("profileName").value=p.name||"";document.getElementById("profileAge").value=p.age||"";document.getElementById("profileHeight").value=p.height||"";document.getElementById("profileGoal").value=p.goal||""}
 function saveProfile(){state.profile={name:document.getElementById("profileName").value.trim(),age:document.getElementById("profileAge").value,height:document.getElementById("profileHeight").value,goal:document.getElementById("profileGoal").value};persist();document.getElementById("profileSaved").textContent="Perfil salvo neste aparelho.";updateHome();renderEvolution()}
 function addWeight(){const date=document.getElementById("weightDate").value||today(),value=Number(document.getElementById("weightValue").value);if(!value||value<=0){alert("Informe um peso válido.");return}state.weights=state.weights.filter(w=>w.date!==date);state.weights.push({date,value});state.weights.sort((a,b)=>a.date.localeCompare(b.date));persist();document.getElementById("weightValue").value="";renderEvolution()}
