@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1711">
 <meta name="description" content="NutriFit — organização alimentar e educação nutricional geral."><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
-<title>NutriFit — 597 TACO + Mar</title>
+<title>NutriFit 2.2 — 597 TACO + catálogo adicional</title>
 <style>
 :root{--bg:#07110d;--panel:#0e1d17;--panel2:#12261e;--text:#f3fff8;--muted:#9ab0a5;--accent:#57e37b;--line:#244237;--danger:#ff7d7d}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(145deg,#06100c,#0a1813 55%,#06100c);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
@@ -27,7 +27,7 @@ input[type=number],input[type=text],input[type=date],select{width:100%;padding:1
 </head>
 <body>
 <div class="app">
-<header class="brand"><div class="logo">N</div><div><h1>NutriFit</h1><small>Alimentação inteligente • seu painel pessoal • 597 TACO + catálogo marinho</small></div></header>
+<header class="brand"><div class="logo">N</div><div><h1>NutriFit</h1><small>Alimentação inteligente • seu painel pessoal • versão 2.2</small></div></header>
 
 <nav aria-label="Navegação principal">
 <button class="active" data-tab="inicio">Início</button><button data-tab="alimentos">Alimentos</button><button data-tab="prato">Prato</button><button data-tab="diario">Diário</button><button data-tab="evolucao">Evolução</button><button data-tab="perfil">Perfil</button><button data-tab="premium">Premium</button>
@@ -67,15 +67,23 @@ input[type=number],input[type=text],input[type=date],select{width:100%;padding:1
 <div class="section"><h3>🔐 Seus dados</h3><p class="note">Os registros desta versão ficam no armazenamento local do navegador. Você pode exportar ou apagar os dados.</p><div class="row"><button class="btn secondary" onclick="exportData()">Exportar meus dados</button><button class="btn danger" onclick="clearAllData()">Apagar dados locais</button></div></div>
 </section>
 
-<footer>Fonte principal: TACO — 4ª edição, NEPA/UNICAMP (597 alimentos; dados por 100 g). O catálogo marinho complementar usa valores de referência aproximados e é identificado separadamente.<br>NutriFit é uma ferramenta de organização alimentar e educação nutricional geral. Não substitui avaliação de médico ou nutricionista e não deve ser usado para diagnosticar ou tratar doenças.</footer>
+<footer>Fonte principal: TACO — 4ª edição, NEPA/UNICAMP (597 alimentos; valores por 100 g). O catálogo marinho complementar usa valores de referência aproximados e é identificado separadamente.<br>NutriFit 2.2 é uma ferramenta de organização alimentar e educação nutricional geral. Não substitui avaliação de médico ou nutricionista e não deve ser usado para diagnosticar ou tratar doenças.</footer>
 </div>
 
 <script>
 let foods = [];
-const KEY="nutrifit_state_v21";
+const KEY="nutrifit_state_v22";
+const OLD_KEY="nutrifit_state_v21";
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function defaultState(){return {profile:{name:"",age:"",height:"",goal:""},diaryDate:today(),diary:[],weights:[],plate:[]}}
-function loadState(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");return s?Object.assign(defaultState(),s):defaultState()}catch(e){return defaultState()}}
+function loadState(){
+  try{
+    let raw=localStorage.getItem(KEY);
+    if(!raw) raw=localStorage.getItem(OLD_KEY);
+    const s=JSON.parse(raw||"null");
+    return s?Object.assign(defaultState(),s):defaultState();
+  }catch(e){return defaultState()}
+}
 let state=loadState();
 function persist(){localStorage.setItem(KEY,JSON.stringify(state))}
 function ensureToday(){if(state.diaryDate!==today()){state.diaryDate=today();state.diary=[];persist()}}
@@ -109,26 +117,41 @@ function loadProfile(){const p=state.profile||{};document.getElementById("profil
 function saveProfile(){state.profile={name:document.getElementById("profileName").value.trim(),age:document.getElementById("profileAge").value,height:document.getElementById("profileHeight").value,goal:document.getElementById("profileGoal").value};persist();document.getElementById("profileSaved").textContent="Perfil salvo neste aparelho.";updateHome();renderEvolution()}
 function addWeight(){const date=document.getElementById("weightDate").value||today(),value=Number(document.getElementById("weightValue").value);if(!value||value<=0){alert("Informe um peso válido.");return}state.weights=state.weights.filter(w=>w.date!==date);state.weights.push({date,value});state.weights.sort((a,b)=>a.date.localeCompare(b.date));persist();document.getElementById("weightValue").value="";renderEvolution()}
 function renderEvolution(){const ws=state.weights||[],p=state.profile||{},current=ws.length?ws[ws.length-1].value:null,first=ws.length?ws[0].value:null;document.getElementById("currentWeight").textContent=current?fmt(current)+" kg":"—";document.getElementById("goalWeight").textContent=p.goal?fmt(p.goal)+" kg":"—";document.getElementById("weightChange").textContent=(current&&first)?((current-first>0?"+":"")+fmt(current-first)+" kg"):"—";document.getElementById("weightEntries").textContent=ws.length;document.getElementById("weightDate").value=today();document.getElementById("weightHistory").innerHTML=ws.length?ws.slice().reverse().map(w=>`<div class="meal"><span>${esc(w.date)}</span><b>${fmt(w.value)} kg</b></div>`).join(""):'<div class="empty">Nenhum peso registrado ainda.</div>'}
-function exportData(){const blob=new Blob([JSON.stringify({app:"NutriFit",version:"2.1",exportedAt:new Date().toISOString(),data:state},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nutrifit-meus-dados.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-function clearAllData(){if(confirm("Apagar todos os registros locais do NutriFit?")){localStorage.removeItem(KEY);state=defaultState();loadProfile();renderDiary();renderEvolution();updateHome();alert("Dados locais apagados.")}}
+function exportData(){const blob=new Blob([JSON.stringify({app:"NutriFit",version:"2.2",exportedAt:new Date().toISOString(),data:state},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nutrifit-meus-dados.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function clearAllData(){if(confirm("Apagar todos os registros locais do NutriFit?")){localStorage.removeItem(KEY);localStorage.removeItem(OLD_KEY);state=defaultState();loadProfile();renderDiary();renderEvolution();updateHome();alert("Dados locais apagados.")}}
 const TACO_CSV_URL="https://raw.githubusercontent.com/brolesi/taco/refs/heads/main/data/processed/taco/taco_composicao.csv";
 
-function parseCSVLine(line){
-  const out=[]; let cur="", quoted=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i];
+function normHeader(s){
+  return String(s??"").replace(/^\\uFEFF/,"").normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
+}
+
+function parseCSV(text){
+  const rows=[],row=[]; let cur="",quoted=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
     if(ch==='"'){
-      if(quoted && line[i+1]==='"'){cur+='"';i++}
+      if(quoted && text[i+1]==='"'){cur+='"';i++}
       else quoted=!quoted;
-    }else if(ch==="," && !quoted){out.push(cur);cur=""}
-    else cur+=ch;
+    }else if(ch===","&&!quoted){
+      row.push(cur);cur="";
+    }else if((ch==="\\n"||ch==="\\r")&&!quoted){
+      if(ch==="\\r"&&text[i+1]==="\\n")i++;
+      row.push(cur);cur="";
+      if(row.some(v=>String(v).trim()!==""))rows.push(row.splice(0,row.length));
+    }else cur+=ch;
   }
-  out.push(cur); return out;
+  row.push(cur);
+  if(row.some(v=>String(v).trim()!==""))rows.push(row);
+  return rows;
 }
 
 function tacoNumber(v){
-  if(v==null || v==="" || v==="NA") return 0;
-  const n=Number(String(v).replace(",","."));
+  if(v==null)return 0;
+  const raw=String(v).trim();
+  if(!raw||/^na$/i.test(raw)||/^null$/i.test(raw))return 0;
+  const n=Number(raw.replace(/\\s/g,"").replace(",","."));
   return Number.isFinite(n)?n:0;
 }
 
@@ -195,11 +218,96 @@ const MARINE_FOODS=[
 ];
 
 function loadTaco597(){
-  const CACHE_KEY="nutrifit_taco_cache_v1";
-  const applyFoods=(tacoFoods)=>{const seen=new Set(tacoFoods.map(x=>foodKey(x.name)));const marine=MARINE_FOODS.filter(x=>!seen.has(foodKey(x.name)));foods=[...tacoFoods,...marine];selectedCat="Todos";rebuildCategories();renderFoods();initPlate();renderPlate();const title=document.querySelector("#alimentos h3");if(title)title.textContent="Banco de alimentos — 597 TACO + "+marine.length+" marinhos"};
-  const parseText=text=>{const lines=text.split(/\r?\n/).filter(Boolean);if(lines.length<598)throw new Error("Banco TACO incompleto");const rows=lines.slice(1).map(parseCSVLine);const loaded=rows.map(r=>({name:r[1],cat:r[2]||"Outros",kcal:tacoNumber(r[7]),p:tacoNumber(r[9]),c:tacoNumber(r[12]),f:tacoNumber(r[10]),fiber:tacoNumber(r[13]),tacoId:r[0]})).filter(x=>x.name);if(loaded.length<597)throw new Error("Esperados pelo menos 597 alimentos; recebidos "+loaded.length);return loaded.slice(0,597)};
-  try{const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");if(Array.isArray(cached)&&cached.length>=597)applyFoods(cached)}catch(e){}
-  return fetch(TACO_CSV_URL,{cache:"no-cache"}).then(r=>{if(!r.ok)throw new Error("Falha ao carregar TACO");return r.text()}).then(text=>{const tacoFoods=parseText(text);localStorage.setItem(CACHE_KEY,JSON.stringify(tacoFoods));applyFoods(tacoFoods)}).catch(err=>{const title=document.querySelector("#alimentos h3");if(foods.length){if(title)title.textContent="Banco de alimentos — TACO em cache + marinhos";console.warn("NutriFit: usando TACO em cache",err)}else{if(title)title.textContent="Banco de alimentos — conecte-se à internet";renderFoods();initPlate();renderPlate()}})
+  const CACHE_KEY="nutrifit_taco_cache_v22";
+
+  function applyFoods(tacoFoods){
+    const seen=new Set(tacoFoods.map(x=>foodKey(x.name)));
+    const marine=MARINE_FOODS.filter(x=>!seen.has(foodKey(x.name)));
+    foods=[...tacoFoods,...marine];
+    selectedCat="Todos";
+    rebuildCategories();
+    renderFoods();
+    initPlate();
+    renderPlate();
+    const title=document.querySelector("#alimentos h3");
+    if(title) title.textContent="Banco de alimentos — 597 TACO + "+marine.length+" adicionais";
+    console.info("NutriFit 2.2: TACO validado com 597 alimentos + catálogo adicional.",{
+      taco:tacoFoods.length, adicional:marine.length, total:foods.length
+    });
+  }
+
+  function parseTaco(text){
+    const rows=parseCSV(text);
+    if(rows.length<598) throw new Error("Banco TACO incompleto: "+rows.length+" linhas.");
+
+    const header=rows[0].map(normHeader);
+    const idx={
+      id:header.indexOf("numero_alimento"),
+      name:header.indexOf("descricao"),
+      cat:header.indexOf("categoria"),
+      kcal:header.indexOf("energia_kcal"),
+      p:header.indexOf("proteina_g"),
+      f:header.indexOf("lipideos_g"),
+      c:header.indexOf("carboidrato_g"),
+      fiber:header.indexOf("fibra_g")
+    };
+
+    const missing=Object.entries(idx).filter(x=>x[1]<0).map(x=>x[0]);
+    if(missing.length) throw new Error("Colunas TACO ausentes: "+missing.join(", "));
+
+    const loaded=rows.slice(1).map(r=>({
+      name:String(r[idx.name]??"").trim(),
+      cat:String(r[idx.cat]??"Outros").trim()||"Outros",
+      kcal:tacoNumber(r[idx.kcal]),
+      p:tacoNumber(r[idx.p]),
+      c:tacoNumber(r[idx.c]),
+      f:tacoNumber(r[idx.f]),
+      fiber:tacoNumber(r[idx.fiber]),
+      tacoId:String(r[idx.id]??"").trim()
+    })).filter(x=>x.name);
+
+    if(loaded.length!==597) throw new Error("Esperados 597 alimentos; recebidos "+loaded.length+".");
+
+    const invalid=loaded.filter(x=>
+      !Number.isFinite(x.kcal)||x.kcal<0||x.kcal>=1500||
+      !Number.isFinite(x.p)||x.p<0||
+      !Number.isFinite(x.c)||x.c<0||
+      !Number.isFinite(x.f)||x.f<0||
+      !Number.isFinite(x.fiber)||x.fiber<0
+    );
+    if(invalid.length>10) throw new Error("Validação nutricional falhou: "+invalid.length+" registros fora do padrão.");
+
+    return loaded;
+  }
+
+  try{
+    const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");
+    if(Array.isArray(cached)&&cached.length===597) applyFoods(cached);
+  }catch(e){
+    console.warn("Cache TACO inválido; será atualizado pela fonte.",e);
+  }
+
+  return fetch(TACO_CSV_URL,{cache:"no-store"})
+    .then(r=>{
+      if(!r.ok) throw new Error("Falha ao carregar TACO ("+r.status+")");
+      return r.text();
+    })
+    .then(text=>{
+      const tacoFoods=parseTaco(text);
+      localStorage.setItem(CACHE_KEY,JSON.stringify(tacoFoods));
+      applyFoods(tacoFoods);
+    })
+    .catch(err=>{
+      const title=document.querySelector("#alimentos h3");
+      if(foods.length){
+        if(title) title.textContent="Banco de alimentos — TACO em cache + adicionais";
+        console.warn("NutriFit: fonte TACO indisponível; mantendo banco validado em cache.",err);
+      }else{
+        if(title) title.textContent="Banco de alimentos — modo offline";
+        renderFoods();initPlate();renderPlate();
+        console.warn("NutriFit: TACO não pôde ser carregada.",err);
+      }
+    });
 }
 
 document.getElementById("weightDate").value=today();
