@@ -331,9 +331,35 @@ const MARINE_FOODS=[
 ];
 
 function loadTaco597(){
-  const CACHE_KEY="nutrifit_taco_cache_v23";
+  const CACHE_KEY="nutrifit_taco_cache_v24";
+
+  function validateTacoDataset(tacoFoods){
+    if(!Array.isArray(tacoFoods)||tacoFoods.length!==597) return false;
+
+    const arroz=tacoFoods.find(x=>foodKey(x.name)==="arroz, integral, cozido");
+    if(!arroz) return false;
+
+    // Teste de sanidade: evita aceitar cache antigo com colunas deslocadas.
+    if(arroz.kcal<100||arroz.kcal>140) return false;
+    if(arroz.p<1||arroz.p>4) return false;
+    if(arroz.c<20||arroz.c>30) return false;
+    if(arroz.f<0||arroz.f>2) return false;
+    if(arroz.fiber<1||arroz.fiber>4) return false;
+
+    return tacoFoods.every(x=>
+      Number.isFinite(x.kcal)&&x.kcal>=0&&x.kcal<=1500&&
+      Number.isFinite(x.p)&&x.p>=0&&x.p<=100&&
+      Number.isFinite(x.c)&&x.c>=0&&x.c<=100&&
+      Number.isFinite(x.f)&&x.f>=0&&x.f<=100&&
+      Number.isFinite(x.fiber)&&x.fiber>=0&&x.fiber<=100
+    );
+  }
 
   function applyFoods(tacoFoods){
+    if(!validateTacoDataset(tacoFoods)){
+      throw new Error("Banco TACO passou a conter dados nutricionais inconsistentes.");
+    }
+
     const seen=new Set(tacoFoods.map(x=>foodKey(x.name)));
     const marine=MARINE_FOODS.filter(x=>!seen.has(foodKey(x.name)));
     foods=[...tacoFoods,...marine];
@@ -395,7 +421,11 @@ function loadTaco597(){
 
   try{
     const cached=JSON.parse(localStorage.getItem(CACHE_KEY)||"null");
-    if(Array.isArray(cached)&&cached.length===597) applyFoods(cached);
+    if(Array.isArray(cached)&&validateTacoDataset(cached)){
+      applyFoods(cached);
+    }else{
+      localStorage.removeItem(CACHE_KEY);
+    }
   }catch(e){
     console.warn("Cache TACO inválido; será atualizado pela fonte.",e);
   }
@@ -407,6 +437,9 @@ function loadTaco597(){
     })
     .then(text=>{
       const tacoFoods=parseTaco(text);
+      if(!validateTacoDataset(tacoFoods)){
+        throw new Error("Os valores TACO recebidos não passaram na validação.");
+      }
       localStorage.setItem(CACHE_KEY,JSON.stringify(tacoFoods));
       applyFoods(tacoFoods);
     })
