@@ -236,7 +236,7 @@ function addWeight(){const date=document.getElementById("weightDate").value||tod
 function renderEvolution(){const ws=state.weights||[],p=state.profile||{},current=ws.length?ws[ws.length-1].value:null,first=ws.length?ws[0].value:null;document.getElementById("currentWeight").textContent=current?fmt(current)+" kg":"—";document.getElementById("goalWeight").textContent=p.goal?fmt(p.goal)+" kg":"—";document.getElementById("weightChange").textContent=(current&&first)?((current-first>0?"+":"")+fmt(current-first)+" kg"):"—";document.getElementById("weightEntries").textContent=ws.length;document.getElementById("weightDate").value=today();document.getElementById("weightHistory").innerHTML=ws.length?ws.slice().reverse().map(w=>`<div class="meal"><span>${esc(w.date)}</span><b>${fmt(w.value)} kg</b></div>`).join(""):'<div class="empty">Nenhum peso registrado ainda.</div>'}
 function exportData(){const blob=new Blob([JSON.stringify({app:"NutriFit",version:"2.3",exportedAt:new Date().toISOString(),data:state},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="nutrifit-meus-dados.json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function clearAllData(){if(confirm("Apagar todos os registros locais do NutriFit?")){localStorage.removeItem(KEY);localStorage.removeItem(OLD_KEY);localStorage.removeItem(LEGACY_KEY);state=defaultState();loadProfile();renderDiary();renderEvolution();updateHome();alert("Dados locais apagados.")}}
-const TACO_CSV_URL="https://raw.githubusercontent.com/brolesi/taco/main/data/processed/taco/taco_composicao.csv";
+const TACO_CSV_URL="https://raw.githubusercontent.com/brolesi/taco/main/data/processed/taco/taco_composicao.csv?nutrifit=20260919";
 
 function normHeader(s){
   return String(s??"").replace(/^\uFEFF/,"").normalize("NFD")
@@ -335,7 +335,7 @@ const MARINE_FOODS=[
 ];
 
 function loadTaco597(){
-  const CACHE_KEY="nutrifit_taco_cache_v26";
+  const CACHE_KEY="nutrifit_taco_cache_v27";
 
   function validateTacoDataset(tacoFoods){
     if(!Array.isArray(tacoFoods)||tacoFoods.length!==597) return false;
