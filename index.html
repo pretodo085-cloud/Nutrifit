@@ -106,7 +106,11 @@ function norm(s){return String(s??"").normalize("NFD").replace(/[\u0300-\u036f]/
 function safeGrams(v){const raw=String(v??"").trim().replace(",",".");const g=Number(raw);return Number.isFinite(g)&&g>0&&g<=10000?g:0}
 function foodKey(name){return norm(name)}
 function findFood(name){const k=foodKey(name);return foods.find(x=>foodKey(x.name)===k)}
-function nutrition(f,grams){const g=safeGrams(grams),m=g/100;return {grams:g,kcal:(Number(f?.kcal)||0)*m,p:(Number(f?.p)||0)*m,c:(Number(f?.c)||0)*m,f:(Number(f?.f)||0)*m,fiber:(Number(f?.fiber)||0)*m}}
+function nutrition(f,grams){
+  const g=safeGrams(grams),m=g/100;
+  if(!f||!g)return {grams:g,kcal:0,p:0,c:0,f:0,fiber:0};
+  return {grams:g,kcal:(Number(f.kcal)||0)*m,p:(Number(f.p)||0)*m,c:(Number(f.c)||0)*m,f:(Number(f.f)||0)*m,fiber:(Number(f.fiber)||0)*m};
+}
 function renderFoods(){const q=norm(document.getElementById("search").value||"");const arr=foods.filter(f=>(selectedCat==="Todos"||f.cat===selectedCat)&&(!q||norm(f.name).includes(q)||norm(f.name).replace(/,/g," ").includes(q)));document.getElementById("foodlist").innerHTML=arr.map(f=>`<div class="food" data-name="${esc(f.name)}"><div><strong>${esc(f.name)}</strong><small>${esc(f.cat)} • por 100 g</small></div><div class="kcal">${fmt(f.kcal)} kcal</div></div>`).join("")||'<div class="empty">Nenhum alimento encontrado.</div>';document.querySelectorAll(".food").forEach(el=>el.addEventListener("click",()=>showFood(el.dataset.name)))}
 function showFood(name){const f=findFood(name);if(!f)return;const d=document.getElementById("detail");d.classList.remove("hidden");d.innerHTML=`<div class="detail"><div><span class="badge">${esc(f.cat)}</span><h2>${esc(f.name)}</h2><div class="bigkcal" id="calcKcal">${f.kcal} kcal</div><small>por 100 g</small></div><div><div class="row"><input id="grams" type="number" value="" min="0.1" max="10000" step="0.1" inputmode="decimal"><button class="btn" id="addFoodBtn">+ Adicionar</button></div><div class="macro" id="macros"></div></div></div>`;document.getElementById("grams").addEventListener("input",()=>calc(name));document.getElementById("addFoodBtn").addEventListener("click",()=>addDiary(name));calc(name);d.scrollIntoView({behavior:"smooth",block:"nearest"})}
 function calc(name){const f=findFood(name),input=document.getElementById("grams"),raw=input?.value??"",g=safeGrams(raw);if(!f)return;if(input&&String(raw).trim()===""){document.getElementById("calcKcal").textContent="Peso inválido";document.getElementById("macros").innerHTML="<div><small>Informe um peso entre 0,1 g e 10.000 g.</small></div>";return}const n=nutrition(f,g);document.getElementById("calcKcal").textContent=fmt(n.kcal)+" kcal";document.getElementById("macros").innerHTML=`<div><b>${fmt(n.p)} g</b><small>Proteínas</small></div><div><b>${fmt(n.c)} g</b><small>Carboidratos</small></div><div><b>${fmt(n.f)} g</b><small>Gorduras</small></div><div><b>${fmt(n.fiber)} g</b><small>Fibras</small></div>`}
@@ -116,7 +120,7 @@ function updateHome(){ensureToday();const t=totals();["homeKcal","homeP","homeC"
 function renderDiary(){ensureToday();const t=totals();["dayKcal","dayP","dayC","dayF","dayFiber","dayWeight"].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[fmt(t.k),fmt(t.p)+" g",fmt(t.c)+" g",fmt(t.f)+" g",fmt(t.fiber)+" g",fmt(t.g)+" g"][i]});document.getElementById("meals").innerHTML=state.diary.length?state.diary.map((x,i)=>{const f=findFood(x.name),n=nutrition(f,x.g);return `<div class="meal"><span><b>${esc(x.name)}</b><br><small>${fmt(n.grams)} g • ${fmt(n.kcal)} kcal • P ${fmt(n.p)} g • C ${fmt(n.c)} g • G ${fmt(n.f)} g • Fibra ${fmt(n.fiber)} g</small></span><button class="del" data-i="${i}">remover</button></div>`}).join(""):'<div class="empty">Seu diário de hoje está vazio. Adicione alimentos pela aba Alimentos.</div>';document.querySelectorAll(".del").forEach(b=>b.addEventListener("click",()=>removeMeal(Number(b.dataset.i))))}
 function removeMeal(i){state.diary.splice(i,1);persist();renderDiary();updateHome()}
 function clearDiary(){if(confirm("Limpar o diário de hoje?")){state.diary=[];persist();renderDiary();updateHome()}}
-function initPlate(){const sel=document.getElementById("plateFood");if(!sel)return;if(sel.options.length!==foods.length)sel.innerHTML=foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("")}
+function initPlate(){const sel=document.getElementById("plateFood");if(!sel)return;sel.innerHTML=foods.map(f=>`<option value="${esc(f.name)}">${esc(f.name)}</option>`).join("")}
 function addToPlate(){
   const name=document.getElementById("plateFood").value;
   const input=document.getElementById("plateGrams");
@@ -331,7 +335,7 @@ const MARINE_FOODS=[
 ];
 
 function loadTaco597(){
-  const CACHE_KEY="nutrifit_taco_cache_v24";
+  const CACHE_KEY="nutrifit_taco_cache_v25";
 
   function validateTacoDataset(tacoFoods){
     if(!Array.isArray(tacoFoods)||tacoFoods.length!==597) return false;
