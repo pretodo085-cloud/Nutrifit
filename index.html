@@ -65,7 +65,6 @@ function clearAllData(){if(confirm("Apagar todos os dados locais?")){localStorag
 function migrate(){state.profile=state.profile||def().profile;state.diary=Array.isArray(state.diary)?state.diary.map(function(x){return{name:String(x.name||""),g:gnum(x.g??x.grams),ts:x.ts||Date.now()}}).filter(function(x){return x.name&&x.g}):[];state.plate=Array.isArray(state.plate)?state.plate.map(function(x){return{name:String(x.name||""),g:gnum(x.g??x.grams)}}).filter(function(x){return x.name&&x.g}):[];state.weights=Array.isArray(state.weights)?state.weights:[];save()}
 foods=EMBEDDED_TACO_597.map(function(x){return{name:String(x.name||""),cat:String(x.cat||"Outros"),kcal:Number(x.kcal)||0,p:Number(x.p)||0,c:Number(x.c)||0,f:Number(x.f)||0,fiber:Number(x.fiber)||0}});
 migrate();window.cat="Todos";weightDate.value=today();document.querySelector('nav button[data-tab="inicio"]').classList.add("active");initPlate();renderFoods();renderPlate();renderDiary();renderEvolution();loadProfile();updateHome();
-<script>
 let deferredInstallPrompt=null;
 window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstallPrompt=e;const b=document.getElementById('installBtn');if(b)b.style.display='block'});
 window.addEventListener('appinstalled',function(){deferredInstallPrompt=null;const b=document.getElementById('installBtn');if(b)b.style.display='none'});
