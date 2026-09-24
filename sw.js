@@ -1,4 +1,4 @@
-const CACHE_NAME = "nutrifit-final-v4";
+const CACHE_NAME = "nutrifit-final-v5";
 const ASSETS = ["./","./index.html","./manifest.webmanifest","./icon-192.svg","./icon-512.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
