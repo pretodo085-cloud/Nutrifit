@@ -1,23 +1,16 @@
 // NutriFit Premium — Cloudflare Worker + Hotmart
-// Secrets (Cloudflare Worker > Settings > Variables and Secrets):
-// HOTMART_CLIENT_ID
-// HOTMART_CLIENT_SECRET
-// NUTRIFIT_PRODUCT_ID
-// HOTMART_HOTTOK
-//
-// Routes:
-// GET  /health
-// GET  /?transaction=HP...
-// POST /webhook  (Hotmart Webhook V2)
+// Secrets: HOTMART_CLIENT_ID, HOTMART_CLIENT_SECRET, NUTRIFIT_PRODUCT_ID, HOTMART_HOTTOK
+// Routes: GET /?transaction=HP... | GET /health | POST /webhook/hotmart
 
+const DEFAULT_PRODUCT_ID = "8588373";
 const ALLOWED_ORIGIN = "*";
-const APPROVED = new Set(["APPROVED", "COMPLETE"]);
 
 function cors(extra = {}) {
   return {
     "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Access-Control-Allow-Headers": "Content-Type, X-HOTMART-HOTTOK",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Cache-Control": "no-store",
     ...extra
   };
 }
@@ -33,30 +26,49 @@ function cleanTransaction(value) {
   return String(value || "").trim().toUpperCase();
 }
 
-async function hotmartAccessToken(env) {
+async function getAccessToken(env) {
   if (!env.HOTMART_CLIENT_ID || !env.HOTMART_CLIENT_SECRET) {
-    throw new Error("Hotmart API credentials not configured");
+    throw new Error("Hotmart credentials not configured");
   }
 
   const basic = btoa(env.HOTMART_CLIENT_ID + ":" + env.HOTMART_CLIENT_SECRET);
-  const url =
-    "https://api-sec-vlc.hotmart.com/security/oauth/token" +
-    "?grant_type=client_credentials" +
-    "&client_id=" + encodeURIComponent(env.HOTMART_CLIENT_ID) +
-    "&client_secret=" + encodeURIComponent(env.HOTMART_CLIENT_SECRET);
-
-  const r = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Authorization": "Basic " + basic,
-      "Content-Type": "application/json"
+  const r = await fetch(
+    "https://api-sec-vlc.hotmart.com/security/oauth/token?grant_type=client_credentials",
+    {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + basic,
+        "Content-Type": "application/json"
+      }
     }
-  });
+  );
 
   if (!r.ok) throw new Error("Hotmart authentication failed");
   const data = await r.json();
-  if (!data.access_token) throw new Error("Hotmart access token not returned");
+  if (!data.access_token) throw new Error("Access token not returned");
   return data.access_token;
+}
+
+async function salesUsers(transaction, status, productId, token) {
+  const qs = new URLSearchParams({
+    transaction,
+    transaction_status: status,
+    product_id: productId,
+    max_results: "50"
+  });
+
+  const r = await fetch(
+    "https://developers.hotmart.com/payments/api/v1/sales/users?" + qs,
+    {
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  if (!r.ok) throw new Error("Hotmart sales lookup failed: " + r.status);
+  return r.json();
 }
 
 async function verifyTransaction(transaction, env) {
@@ -64,54 +76,44 @@ async function verifyTransaction(transaction, env) {
     return { active: false, message: "Código de transação inválido." };
   }
 
-  if (!env.NUTRIFIT_PRODUCT_ID) {
-    throw new Error("NUTRIFIT_PRODUCT_ID not configured");
-  }
+  const productId = String(env.NUTRIFIT_PRODUCT_ID || DEFAULT_PRODUCT_ID);
+  const token = await getAccessToken(env);
 
-  const token = await hotmartAccessToken(env);
-  const url =
-    "https://developers.hotmart.com/payments/api/v1/sales/history" +
-    "?transaction=" + encodeURIComponent(transaction) +
-    "&max_results=1";
+  for (const status of ["APPROVED", "COMPLETE"]) {
+    const data = await salesUsers(transaction, status, productId, token);
+    const item = Array.isArray(data.items)
+      ? data.items.find(x => cleanTransaction(x.transaction) === transaction)
+      : null;
 
-  const r = await fetch(url, {
-    headers: {
-      "Authorization": "Bearer " + token,
-      "Content-Type": "application/json"
+    if (item) {
+      return {
+        active: true,
+        status,
+        transaction,
+        product_id: productId,
+        message: "Compra aprovada. Premium liberado."
+      };
     }
-  });
-
-  if (!r.ok) throw new Error("Hotmart sales lookup failed");
-  const data = await r.json();
-  const item = Array.isArray(data.items) ? data.items[0] : null;
-
-  if (!item || !item.purchase) {
-    return { active: false, message: "Compra não encontrada." };
-  }
-
-  const productId = String(item.product?.id ?? "");
-  const status = String(item.purchase.status ?? "").toUpperCase();
-
-  if (productId !== String(env.NUTRIFIT_PRODUCT_ID)) {
-    return { active: false, message: "Esta transação não pertence ao NutriFit." };
-  }
-
-  if (!APPROVED.has(status)) {
-    return { active: false, status, message: "Pagamento ainda não está aprovado." };
   }
 
   return {
-    active: true,
-    status,
+    active: false,
     transaction,
-    product_id: productId,
-    message: "Compra aprovada. Premium liberado."
+    message: "Compra não confirmada ou acesso não está ativo."
   };
+}
+
+function sameSecret(a, b) {
+  if (!a || !b || a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 async function handleWebhook(request, env) {
   const hottok = request.headers.get("X-HOTMART-HOTTOK") || "";
-  if (!env.HOTMART_HOTTOK || hottok !== env.HOTMART_HOTTOK) {
+
+  if (!env.HOTMART_HOTTOK || !sameSecret(hottok, env.HOTMART_HOTTOK)) {
     return json({ ok: false, message: "Unauthorized" }, 401);
   }
 
@@ -122,19 +124,16 @@ async function handleWebhook(request, env) {
     return json({ ok: false, message: "JSON inválido" }, 400);
   }
 
-  const event = body?.event || "";
-  const transaction = body?.data?.purchase?.transaction || "";
-  const status = body?.data?.purchase?.status || "";
+  const event = body?.event || "UNKNOWN";
+  const transaction = body?.data?.purchase?.transaction || null;
+  const productId =
+    body?.data?.product?.id ??
+    body?.data?.purchase?.product?.id ??
+    null;
 
-  // O webhook é aceito para manter a integração pronta para automações futuras.
-  // A liberação efetiva do acesso é feita pela consulta segura da transação à API.
-  return json({
-    ok: true,
-    received: true,
-    event,
-    transaction,
-    status
-  });
+  console.log(JSON.stringify({ event, transaction, productId }));
+
+  return json({ ok: true, received: true, event });
 }
 
 export default {
@@ -145,39 +144,37 @@ export default {
 
     const url = new URL(request.url);
 
-    if (url.pathname === "/health") {
+    if (url.pathname === "/health" && request.method === "GET") {
       return json({
         ok: true,
         service: "NutriFit Premium",
-        hotmart: Boolean(env.HOTMART_CLIENT_ID && env.HOTMART_CLIENT_SECRET && env.NUTRIFIT_PRODUCT_ID)
+        product_id: String(env.NUTRIFIT_PRODUCT_ID || DEFAULT_PRODUCT_ID),
+        api_configured: Boolean(env.HOTMART_CLIENT_ID && env.HOTMART_CLIENT_SECRET)
       });
     }
 
-    if (url.pathname === "/webhook" && request.method === "POST") {
+    if (url.pathname === "/webhook/hotmart" && request.method === "POST") {
       return handleWebhook(request, env);
     }
 
-    if (request.method !== "GET") {
-      return json({ active: false, message: "Método não permitido." }, 405);
+    if (url.pathname === "/" && request.method === "GET") {
+      const transaction = cleanTransaction(url.searchParams.get("transaction"));
+
+      if (!transaction) {
+        return json({ ok: true, service: "NutriFit Premium", status: "online" });
+      }
+
+      try {
+        return json(await verifyTransaction(transaction, env));
+      } catch (error) {
+        console.error(error);
+        return json({
+          active: false,
+          message: "Servidor de validação indisponível."
+        }, 503);
+      }
     }
 
-    const transaction = cleanTransaction(url.searchParams.get("transaction"));
-
-    if (!transaction) {
-      return json({
-        active: false,
-        service: "NutriFit Premium",
-        message: "Informe ?transaction=HP..."
-      }, 400);
-    }
-
-    try {
-      return json(await verifyTransaction(transaction, env));
-    } catch (error) {
-      return json({
-        active: false,
-        message: "Servidor de validação não configurado ou indisponível."
-      }, 503);
-    }
+    return json({ ok: false, message: "Rota não encontrada." }, 404);
   }
 };
