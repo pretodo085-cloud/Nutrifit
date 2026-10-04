@@ -1,7 +1,7 @@
 {
   "name": "NutriFit",
   "short_name": "NutriFit",
-  "description": "NutriFit — organização alimentar e educação nutricional geral.",
+  "description": "NutriFit — alimentação inteligente, banco TACO + catálogo marinho, cálculo por gramas, prato, diário e evolução.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
