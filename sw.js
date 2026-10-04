@@ -1,4 +1,4 @@
-const CACHE_NAME = "nutrifit-final-v7";
+const CACHE_NAME = "nutrifit-final-v8";
 const ASSETS = [
   "./",
   "./index.html",
